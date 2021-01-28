@@ -3,29 +3,31 @@ import rospy
 from std_msgs.msg import String
 
 class Robo:
-    topic = None #rospy.sub(
-    pub = None
-    def __init__(self, name):
-        self.topic = "/" + name + "/action"
-        self.pub = rospy.Publisher(self.topic, String, queue_size=10)
+    #Attribute der Klasse Robo:
+    #topic = None
+    #pub = None
+    #Funktionen der Klasse Robo:
+    def __init__(self, name): #Erstelle ein Objekt der Klasse Robo
+        self.topic = "/" + name + "/action" #Schreibe gleich das fuer ihn vorgesehenene Topic in seine Attribute, damit er darauf zurueckgreifen kann.
+        self.pub = rospy.Publisher(self.topic, String, queue_size=10)  #Vermerke in seinen Attributen die Funktion mir der er auf dem fuer ihn vorgesehenen Topic publishen kann.
+        #rospy.Publisher creates a "handle" to publish messages to a topic using the rospy.Publisher Class
 
     def do_action(self, payload):
-        self.pub.publish(payload)
+        self.pub.publish(payload) #Auf dem Topic des Objekts, auf das diese Funktionen angewandt wird, soll die mitgegebene Payload gepublished werden.
 
 class Step:
+    #Attribute der Klasse Step:
     robot = None
     payload = None
+    #Funktionen der Klasse Step:
+    def __init__(self, param_robot, param_parameters): #Erstelle ein Objekt der Klasse Step
+        self.robot = param_robot            #Der Step wird mit dem uebergebenen Roboter...
+        self.payload = param_parameters     #...und dem uebegebenem Parameter (also was machen) ausgefuehrt.
 
-    def __init__(self, param_robot, param_parameters):
-        self.robot = param_robot
-        self.payload = param_parameters
-
-
-
-Roboter1 = Robo("MyRobot1")
+Roboter1 = Robo("MyRobot1") #Roboter1 wird hiermit zu einem Objekt der Klasse Robo mit Topic /MyRobot1/action
 Roboter2 = Robo("MyRobot2")
 
-step1 = Step(Roboter1, "X:42, Y:42, Type:Kleben")
+step1 = Step(Roboter1, "X:42, Y:42, Type:Kleben") #Fuer einfaches Aufrufen, schreiben wir es in eine Variable
 step2 = Step(Roboter2, "length: 5cm")
 step3 = Step(Roboter2, "X:43, Y:33, Type: milling")
 
@@ -36,9 +38,11 @@ subber = None
 def callback(data):
     global p, all_steps, subber
 
-    if p<len(all_steps):
+    if p<len(all_steps): #len() gibt die Laenge des Arrays, das wir als Parameter mitgegeben haben zurueck
         rospy.loginfo("Got Message!")
         all_steps[p].robot.do_action(all_steps[p].payload)
+        #An dem akktuellem Objekt der Klasse Step wird die Funktion do_action ausgefuehrt
+        #Payload ist ein Atribut der Klasse step --> in diesem Fall ist es der String den wir bei der Instanziierung hineingeben.
         p += 1
     else:
         rospy.loginfo("Wir sind fertig")
@@ -48,35 +52,34 @@ def callback(data):
 
 def app_main():
     global subber
-    rospy.init_node('leitsystem', anonymous=True)
-    subber = rospy.Subscriber("/StatusOK", String, callback)
-    rospy.loginfo("Starting first step.")
-    all_steps[0].robot.do_action(all_steps[0].payload)
+    rospy.init_node('leitsystem') #Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
+    subber = rospy.Subscriber("/StatusOK", String, callback) #callback eroeffnet einen eigenen Threat, wesewegen es aktiv bleibt
+    rospy.loginfo("Ready to receive first message")
+    all_steps[0].robot.do_action(all_steps[0].payload) #An step wird die Funktion do_action ausgefuehrt
     global p
     p += 1
 
     rospy.spin() #wartet auf Nachricht, ruft dann Callback auf
-
-
-#speudocode für punkt 7:
+"""
+#Pseudocode fuer punkt 7:
 def punkt_7(service):
     msg_list = service.getAllMessageTypes()
     print("Available Functions for service1", msg_list)
     #klassischerweise loopt man durch die msg_list und gibt davor eine index nummer aus. Der User muss dann nur eine nummer eintippen
     #bsp output des loops:
-    """
+    
     [0]: MyFunction1
     [1]: MyFunction2
     ...
-    """
-    msg_type = waitForVALIDIntegerInput() #Um aus der Lite auszuwählen
+    
+    msg_type = waitForVALIDIntegerInput() #Um aus der Lite auszuwaehlen
     print("Enter Message:")
     msg = []
     for i in range(0, len(msg_type.parameters)):
         msg[i] = waitForInput()
 
 
-#speudocode für punkt 8:
+#speudocode fuer punkt 8:
 #sei wfi() = waitForInput()
 steps_count = wfi()
 all_steps = []
@@ -85,7 +88,7 @@ for j in range(0, steps_count):
     service = wfi()
     all_steps[j] = punkt_7(service)
 
-
+"""
 
 if __name__ == '__main__':
-    app_main()
+    app_main() #Den Grund warum das extra als Funktion aufgerufen wird habe ich noch nicht verstanden.
