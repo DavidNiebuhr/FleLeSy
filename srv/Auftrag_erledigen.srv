@@ -1,0 +1,4 @@
+string Auftrag #PTP,Linear,Fräsen
+point
+---
+int64 sum
