@@ -1,5 +1,5 @@
 # FleLeSy
-Flexible controlsystem for
+Flexible controlsystem for IntCDC
 
 
 
