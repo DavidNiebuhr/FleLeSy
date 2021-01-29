@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(flelesy)
+project(FleLeSy)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -204,6 +204,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-catkin_install_python(PROGRAMS scripts/talker.py
+catkin_install_python(PROGRAMS scripts/Leitsystem.py scripts/Roboter_Imitierer.py scripts/Tutorial_add_two_ints_server.py scripts/Tutorial_add_two_ints_client.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
