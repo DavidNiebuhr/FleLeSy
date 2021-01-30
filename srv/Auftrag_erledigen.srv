@@ -1,4 +1,4 @@
 string Auftrag #PTP,Linear,Fräsen
-point
+geometry_msgs/Point
 ---
 int64 sum

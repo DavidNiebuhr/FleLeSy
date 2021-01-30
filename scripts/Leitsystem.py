@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
-
-class Robo:
+"""
+class Module:
     #Attribute der Klasse Robo:
     #topic = None
     #pub = None
@@ -34,6 +34,8 @@ step3 = Step(Roboter2, "X:43, Y:33, Type: milling")
 p = 0
 all_steps = [step1, step2, step3]
 
+
+
 subber = None
 def callback(data):
     global p, all_steps, subber
@@ -48,18 +50,24 @@ def callback(data):
         rospy.loginfo("Wir sind fertig")
         subber.unregister()
     return None
+"""
 
+def NewModule(name):
+    pub = rospy.Publisher("AddModule", String, queue_size=10)
+    rate = rospy.Rate(1)  # 1hz
+    while not rospy.is_shutdown():
+        AddModule = name
+        pub.publish(AddModule)
+        rate.sleep()
 
 def app_main():
     global subber
     rospy.init_node('leitsystem') #Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
-    subber = rospy.Subscriber("/StatusOK", String, callback) #callback eroeffnet einen eigenen Threat, wesewegen es aktiv bleibt
-    rospy.loginfo("Ready to receive first message")
-    all_steps[0].robot.do_action(all_steps[0].payload) #An step wird die Funktion do_action ausgefuehrt
-    global p
-    p += 1
+    rospy.loginfo("Das Leitsystem ist online")
+    NewModuleName = "KUKAchen"
+    NewModule(NewModuleName)
 
-    rospy.spin() #wartet auf Nachricht, ruft dann Callback auf
+
 """
 #Pseudocode fuer punkt 7:
 def punkt_7(service):
