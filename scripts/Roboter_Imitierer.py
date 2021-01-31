@@ -1,50 +1,45 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
-from functools import partial
+from query_yes_no import query_yes_no
+from FleLeSy.srv import *
 
-MaxNumberOfModules = 100 #Die Maximale Anzahl an Modulen die überhaupt verwendet werden können. Z.B. Anzahl Montagemöglichkeiten, lieber zu viel als zu wenig.
-Modules = [] * MaxNumberOfModules
-#AlreadyInitialzedModules = 0
-class Module:
-    # Attribute der Klasse Module:
-    #topic = None
-    #sub = None
-    def __init__(self, name): #Erstelle ein Objekt der Klasse Module
-        rospy.loginfo("Ich erstelle jetzt ein Modul mit dem Namen " + str(name) + ".")
-        #self.topic = "/" + name + "/action" #Schreibe gleich das fuer ihn vorgesehenene Topic in seine Attribute, damit er darauf zurueckgreifen kann.
-        #self.sub = rospy.Subscriber(str(name), String, queue_size=10)  #Vermerke in seinen Attributen die Funktion mir der er auf dem fuer ihn vorgesehenen Topic publishen kann.
-        #rospy.Publisher creates a "handle" to publish messages to a topic using the rospy.Publisher Class
-"""
-def AuftragAusfuehren():
-    return None
+Module_Name = "KUKAchen"
+AmLeitsystemAngemeldet = False
 
-def callbackAuftragAnRoboter(data, AlreadyInitialzedModules):
-    rospy.loginfo("%s hat folgenden Auftrag erhalten:" % Modules[AlreadyInitialzedModules] + str(data.data))
-    AuftragAusfuehren()
-    rospy.loginfo("Auftrag ist ausgefuehrt. Ich melde das jetzt gleich an das Leitsystem.")
-    feedback = rospy.Publisher('/Feedback', String, queue_size=10)
-    feedback.publish("Auftrag " + str(data) + "wurde ausgefuehrt")
-    rospy.loginfo("Das muesste jetzt angekommen sein. Damit muesste alles abgeschlossen sein.")
-    return None
-"""
-def callbackNeuerRoboter(data):
-    AlreadyInitialzedModules = 0
-    Modules[AlreadyInitialzedModules] = Module(data.data)
-    rospy.loginfo("Das %s. Modul ist als Objekt verfügbar. Es heißt %s." % AlreadyInitialzedModules, Modules[AlreadyInitialzedModules])
-    rospy.loginfo("Das Modul nimmt Befehle entgegen auf /%s_befehle_befehle . Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" % Modules[AlreadyInitialzedModules])
-    #rospy.Subscriber("/%s_befehle" % Modules[AlreadyInitialzedModules], String, partial(callbackAuftragAnRoboter, AlreadyInitialzedModules))
+
+def Interpolate(SRV):  # SRV=ServiceResponseValues
+    rospy.loginfo("Ich fahre per Interpolation zu Punkt \nX: %s\nY: %s\nZ: %s" % (
+    SRV.Auftrag, SRV.Ziel.X, SRV.Ziel.Y, SRV.Ziel.Z))
+    return True
+
+
+def offer_services():
+    rospy.Service('Interpolate', Auftrag, Interpolate)
+    rospy.loginfo("Interpolation ist verfuegbar")
     rospy.spin()
-    AlreadyInitialzedModules += 1
-    return None
+
 
 def app_main():
-    AlreadyInitialzedModules = 0
-    rospy.loginfo("Bereit einen Roboter nachzubilden.")
-    rospy.Subscriber("/AddModule", String, callbackNeuerRoboter)
-    rospy.spin()
+    rospy.init_node(Module_Name)
+    if query_yes_no("Moechtest du dass ich mich beim Leitsystem unter meinem Namen %s anmelden?" % Module_Name):
+        rospy.loginfo("Alles klar, ich melde ihn jetzt an.")
+        rospy.wait_for_service('Anmeldeservice')
+        try:
+            Anmeldeservice = rospy.ServiceProxy('Anmeldeservice', ModulAnmeldung)
+            response = Anmeldeservice(Module_Name)
+        except rospy.ServiceException as e:
+            rospy.logerr("Anmeldung konnte nicht beantragt werden: %s" % e)
+        if response.Erfolg:
+            rospy.loginfo("Das Modul ist beim System unter %s bekannt und traegt die Nummer %s" % (
+                response.SystemweiterModulName, response.ModuleNumber))
+        else:
+            rospy.logwarn("Das Leitsystem hat einen Fehler zurueckgemeldet. Details findest du beim Leitsystem.")
+            offer_services()
+    else:  # Falls bei der Nachfrage doch Nein gesagt wurde
+        rospy.loginfo("Okay, dann nicht.")
+    return None
 
 
 if __name__ == '__main__':
-    rospy.init_node('roboter_imitierer')
-    app_main()  # Den Grund warum das extra als Funktion aufgerufen wird habe ich noch nicht verstanden.
+    app_main()  # Den Grund warum das extra als Funktion aufgerufen wird, habe ich noch nicht verstanden.

@@ -1,0 +1,5 @@
+string ModulName
+---
+bool Erfolg
+string SystemweiterModulName
+int16 ModuleNumber

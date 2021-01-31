@@ -57,8 +57,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_service_files(
   FILES
-  AddTwoInts.srv
-  Auftrag_erledigen.srv
+  ModulAnmeldung.srv
+  Auftrag.srv
 )
 
 ## Generate actions in the 'action' folder
