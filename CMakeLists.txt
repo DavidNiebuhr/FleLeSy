@@ -57,7 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_service_files(
   FILES
-  ModulAnmeldung.srv
+  register_module.srv
   Auftrag.srv
 )
 

@@ -3,7 +3,7 @@
 import rospy
 from rosservice import get_service_list
 from std_msgs.msg import String
-from FleLeSy.srv import ModulAnmeldung, ModulAnmeldungResponse
+from FleLeSy.srv import register_module, register_moduleResponse
 
 MaxNumberOfModules = 100  # Die Maximale Anzahl an Modulen die ueberhaupt verwendet werden koennen. Z.B. Anzahl Montagemoeglichkeiten, lieber zu viel als zu wenig.
 Modules = [None] * MaxNumberOfModules
@@ -49,33 +49,27 @@ class Step:
 
 
 def NewModule(SRV):  # Service zur Modulanmeldung #SRV=ServiceResponseValues
-    if SRV.ModulName not in Modules:
+    if SRV.ModulName in Modules:
+        rospy.loginfo("Dieses Modul ist bereits angemeldet.")
+        rospy.loginfo(
+            "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
+            SRV.ModulName)
+        return ModulAnmeldungResponse(False, SRV.ModulName, Modules.index(SRV.ModulName))
+    else:
         i = 0
         while isinstance(Modules[i], String):
             i += 1
-        name = SRV.ModulName
-        name = Module()
         Modules[i] = SRV.ModulName
-        rospy.loginfo(
-            "Das Modul %s ist als Objekt verfuegbar. Es hat die Nummer %s in der Liste der Roboter bekommen." % (
-                Modules[i], str(i)))
+        #rospy.loginfo("Das Modul %s ist als Objekt verfuegbar. Es hat die Nummer %s in der Liste der Roboter bekommen." % (Modules[i], str(i)))
         rospy.loginfo(
             "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
             Modules[i])
         return ModulAnmeldungResponse(True, Modules[i], i)
-    else:
-        rospy.loginfo("Dieses Modul ist bereits angemeldet.")
-        return False
 
 
 def app_main():
-    """
-    AllServices = rospy.loginfo(str(get_service_list(node=None, namespace=None, include_nodes=False)))
-    for x in range(len(AllServices)):
-        rospy.loginfo(AllServices[x])"""
-
     rospy.init_node('leitsystem')  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
-    rospy.Service('Anmeldeservice', ModulAnmeldung, NewModule)
+    rospy.Service('leitsystem/anmeldeservice',register_module , NewModule)
     rospy.loginfo("Das Leitsystem ist online und nimmt Modulanmeldungen entgegen!")
     rospy.spin()
 
