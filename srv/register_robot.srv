@@ -1,0 +1,6 @@
+string RobotName
+string AffiliatedModule
+string AffiliatedManifest
+---
+bool Erfolg
+string Identification
