@@ -93,8 +93,8 @@ def NewModule(SRV):  # Service zur Modulanmeldung #SRV=ServiceResponseValues
 
 
 def app_main():
-    rospy.init_node('leitsystem')  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
-    rospy.Service('leitsystem/anmeldeservice', register_module, NewModule)
+    rospy.init_node('control_system')  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
+    rospy.Service('control_system/anmeldeservice', register_module, NewModule)
     rospy.loginfo("Das Leitsystem ist online und nimmt Modulanmeldungen entgegen!")
     rospy.spin()
 

@@ -58,6 +58,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   register_module.srv
+  register_robot.srv
   Auftrag.srv
 )
 
@@ -162,10 +163,14 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/Leitsystem.py
-  scripts/Roboter_Imitierer.py
+  scripts/control_system.py
+  scripts/robot_imitator.py
   scripts/Tutorial_add_two_ints_server.py
   scripts/Tutorial_add_two_ints_client.py
+  scripts/test.py
+  scripts/query_yes_no.py
+  scripts/objects_in_list_example.py
+  scripts/start_nodes.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
