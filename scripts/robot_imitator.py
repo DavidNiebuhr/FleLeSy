@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
-from query_yes_no import query_yes_no
 from FleLeSy.srv import *
 
+from query_yes_no import query_yes_no
 
-Module_Name = "KUKAchen"
-#AmLeitsystemAngemeldet = False
+RobotName = "KUKAchen"
 
 
 def Interpolate(SRV):  # SRV=ServiceResponseValues
@@ -16,19 +14,19 @@ def Interpolate(SRV):  # SRV=ServiceResponseValues
 
 
 def offer_services():
-    rospy.Service('%s/interpolate' % Module_Name, Auftrag, Interpolate)
+    rospy.Service('%s/interpolate' % RobotName, Auftrag, Interpolate)
     rospy.loginfo("Interpolation ist verfuegbar")
     rospy.spin()
 
 
 def app_main():
-    rospy.init_node(Module_Name)
-    if query_yes_no("Moechtest du dass ich mich beim Leitsystem unter meinem Namen %s anmelden?" % Module_Name):
+    rospy.init_node(RobotName)
+    if query_yes_no("Moechtest du dass ich mich beim Leitsystem unter meinem Namen %s anmelden?" % RobotName):
         rospy.loginfo("Alles klar, ich melde ihn jetzt an.")
         rospy.wait_for_service('leitsystem/anmeldeservice')
         try:
             Anmeldeservice = rospy.ServiceProxy('leitsystem/anmeldeservice', register_module)
-            response = Anmeldeservice(Module_Name)
+            response = Anmeldeservice(RobotName)
         except rospy.ServiceException as e:
             rospy.logerr("Anmeldung konnte nicht beantragt werden: %s" % e)
         if response.Erfolg:

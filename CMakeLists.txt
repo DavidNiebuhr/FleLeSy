@@ -165,6 +165,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/control_system.py
   scripts/robot_imitator.py
+  scripts/module_imitator.py
   scripts/Tutorial_add_two_ints_server.py
   scripts/Tutorial_add_two_ints_client.py
   scripts/test.py
