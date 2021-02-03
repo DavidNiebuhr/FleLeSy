@@ -1,50 +1,37 @@
 #!/usr/bin/env python
-
-import rospy
+import sys
 import uuid
 import roslaunch
-import time
+import rospy
+from query_kill import query_kill
 
-def start_robot_imitator():
-    package = 'FleLeSy'
-    executable = 'robot_imitator.py'
-    name = "robot_imitator_1"
-    identification = uuid.uuid4()
-    namespace = '/%s' % identification
+
+def processstop():
+    rospy.sleep(20)
+    return True
+
+
+def start_exe(launch, package, executable, name, identification):
+    namespace = identification
     node = roslaunch.core.Node(package, executable, name, namespace)
-    launch = roslaunch.scriptapi.ROSLaunch()
-    launch.start()
 
-
-def start_kukarobot():
-    package = 'kuka210_moveit_config'
-    executable = 'demo.launch'
-    name = "kuka_kr210_1"
-    identification = uuid.uuid4()
-    namespace = '/%s' % identification
-    node = roslaunch.core.Node(package, executable, name, namespace)
-    launch = roslaunch.scriptapi.ROSLaunch()
-    launch.start()
-
-
-def start_control_system():
-    package = 'FleLeSy'
-    executable = 'control_system.py'
-    name = "control_system"
-    namespace = '/control_system'
-    node = roslaunch.core.Node(package, executable, name, namespace)
-    launch = roslaunch.scriptapi.ROSLaunch()
-    launch.start()
+    process = launch.launch(node)
+    rospy.loginfo("test startet")
+    while rospy.is_shutdown():
+        process.stop()
 
 
 def app_main():
-    rospy.init_node('start_nodes')
-    time.sleep(0.5)
-    start_control_system()
-    time.sleep(3)
-    start_kukarobot()
-    time.sleep(3)
-    start_robot_imitator()
+    launch = roslaunch.scriptapi.ROSLaunch()
+    launch.start()
+    sys.stdout.write("\nroscore up and running")
+    rospy.sleep(0.1)
+    identification = str(uuid.uuid4())
+    start_exe(launch, "FleLeSy", "test.py", "testnode", identification)
+
+    sys.stdout.write("\nAll processes are running")
+    while not query_kill("\nKill /roscore and all processes?"):
+        rospy.sleep(1)
 
 
 if __name__ == '__main__':

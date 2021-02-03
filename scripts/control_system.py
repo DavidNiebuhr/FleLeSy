@@ -13,7 +13,7 @@ Modules = [None] * MaxNumberOfModules
 class Robot:
     # Attribute der Klasse Robot
 
-    # Muss zu genau einem Modul gehören
+    # Muss zu genau einem Modul gehoeren
     def __init__(self):
         self.RobotID = uuid.uuid4()
 
@@ -34,7 +34,7 @@ class Module:
         # self.sub = rospy.Subscriber(str(name), String, queue_size=10)  #Vermerke in seinen Attributen die Funktion mir der er auf dem fuer ihn vorgesehenen Topic publishen kann.
         # rospy.Publisher creates a "handle" to publish messages to a topic using the rospy.Publisher Class
 
-
+"""
 liste = []
 
 id = "robo1"
@@ -42,7 +42,7 @@ id = "robo1"
 for i in range(0, len(liste)):
     if liste[i].id[3] == x:
 # dosomething
-
+"""
 liste[0]
 """
 class Module:
