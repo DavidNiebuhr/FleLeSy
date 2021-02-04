@@ -6,17 +6,11 @@ import rospy
 from query_kill import query_kill
 
 
-def processstop():
-    rospy.sleep(20)
-    return True
-
-
 def start_exe(launch, package, executable, name, identification):
     namespace = identification
     node = roslaunch.core.Node(package, executable, name, namespace)
-
     process = launch.launch(node)
-    rospy.loginfo("test startet")
+
     while rospy.is_shutdown():
         process.stop()
 
@@ -29,7 +23,7 @@ def app_main():
     identification = str(uuid.uuid4())
     start_exe(launch, "FleLeSy", "test.py", "testnode", identification)
 
-    sys.stdout.write("\nAll processes are running")
+    sys.stdout.write("\nAll modules are running")
     while not query_kill("\nKill /roscore and all processes?"):
         rospy.sleep(1)
 

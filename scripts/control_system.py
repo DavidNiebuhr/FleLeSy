@@ -1,49 +1,45 @@
 #!/usr/bin/env python
 
 import rospy
-import uuid
 from rosservice import get_service_list
 from std_msgs.msg import String
 from FleLeSy.srv import register_module, register_moduleResponse
 
 MaxNumberOfModules = 100  # Die Maximale Anzahl an Modulen die ueberhaupt verwendet werden koennen. Z.B. Anzahl Montagemoeglichkeiten, lieber zu viel als zu wenig.
-Modules = [None] * MaxNumberOfModules
+AllModules = []
+AllRobots = []
 
 
 class Robot:
     # Attribute der Klasse Robot
 
     # Muss zu genau einem Modul gehoeren
-    def __init__(self):
-        self.RobotID = uuid.uuid4()
+    def __init__(self, robotname, ID, AffiliatedModule):
+        self.ID = ID
+        self.robotname = robotname
+        self.AffiliatedModule = AffiliatedModule
+        AllRobots.append(self)
 
-
+    def search_for_robot(self):
+        for i in range(0, len(AllRobots)):
+            if AllRobots.ID == self.ID:  # ID ausstehend
+                break
+        return AllRobots[i]
 
 
 class Module:
-    # Attribute der Klasse Module:
-    # topic = None
-    # sub = None
-    RobotList = []
-
     def __init__(self, Robots):  # Erstelle ein Objekt der Klasse Module
         rospy.loginfo("Ich erstelle jetzt ein Modul mit dem Namen %s." % self)
         self.Robots = Robot
+        AllModules.append(self)
 
-        # self.topic = "/" + name + "/action" #Schreibe gleich das fuer ihn vorgesehenene Topic in seine Attribute, damit er darauf zurueckgreifen kann.
-        # self.sub = rospy.Subscriber(str(name), String, queue_size=10)  #Vermerke in seinen Attributen die Funktion mir der er auf dem fuer ihn vorgesehenen Topic publishen kann.
-        # rospy.Publisher creates a "handle" to publish messages to a topic using the rospy.Publisher Class
+    def search_for_module(self):
+        for i in range(0, len(AllModules)):
+            if AllModules.ID == self.ID:  # ID ausstehend
+                break
+        return AllModules[i]
 
-"""
-liste = []
 
-id = "robo1"
-
-for i in range(0, len(liste)):
-    if liste[i].id[3] == x:
-# dosomething
-"""
-liste[0]
 """
 class Module:
     #Attribute der Klasse Robo:
@@ -73,23 +69,22 @@ class Step:
 
 
 def NewModule(SRV):  # Service zur Modulanmeldung #SRV=ServiceResponseValues
-    if SRV.ModulName in Modules:
+    if SRV.ModulName in AllModules:
         rospy.loginfo("Dieses Modul ist bereits angemeldet.")
         rospy.loginfo(
             "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
             SRV.ModulName)
-        return register_moduleResponse(False, SRV.ModulName, Modules.index(SRV.ModulName))
+        return register_moduleResponse(False, SRV.ModulName, AllModules.index(SRV.ModulName))
     else:
         i = 0
-        while isinstance(Modules[i], String):
+        while isinstance(AllModules[i], String):
             i += 1
-        Modules[i] = SRV.ModulName
+        AllModules[i] = SRV.ModulName
         # rospy.loginfo("Das Modul %s ist als Objekt verfuegbar. Es hat die Nummer %s in der Liste der Roboter bekommen." % (Modules[i], str(i)))
         rospy.loginfo(
             "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
-            Modules[i])
-        return register_moduleResponse(True, Modules[i], i)
-
+            AllModules[i])
+        return register_moduleResponse(True, AllModules[i], i)
 
 
 def app_main():

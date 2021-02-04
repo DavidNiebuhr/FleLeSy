@@ -12,5 +12,5 @@ def query_kill(question):
         if choice in valid:
             return valid[choice]
         else:
-            sys.stdout.write("Please only respond with 'kill' or 'shutdown'\n"
+            sys.stdout.write("\nPlease only respond with 'kill' or 'shutdown'\n"
                              "If you want do keep it running you don't have to do anything\n")

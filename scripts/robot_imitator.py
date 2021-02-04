@@ -9,7 +9,7 @@ RobotName = "KUKAchen"
 
 def Interpolate(SRV):  # SRV=ServiceResponseValues
     rospy.loginfo("Ich fahre per Interpolation zu Punkt \nX: %s\nY: %s\nZ: %s" % (
-    SRV.Auftrag, SRV.target.X, SRV.target.Y, SRV.target.Z))
+    SRV.target.X, SRV.target.Y, SRV.target.Z))
     return True
 
 
