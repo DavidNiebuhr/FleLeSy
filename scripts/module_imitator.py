@@ -33,11 +33,10 @@ def app_main():
     robot2 = Robot("FleLeSy", "robot_imitator.py", "KUKAchen")
     robot2.start_robot_exe(launch)
     try:
-        while True:
-            rospy.sleep(2)
-    except KeyboardInterrupt:
-        pass
-
+        launch.spin()
+    finally:
+        # After Ctrl+C, stop all nodes from running
+        launch.shutdown()
 
 if __name__ == '__main__':
     app_main()

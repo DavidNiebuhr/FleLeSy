@@ -1,0 +1,6 @@
+<launch>
+
+	<node name="control_system" pkg="FleLeSy" type="control_system.py" output="screen"/>
+	<node name="module_imitator" pkg="FleLeSy" type="module_imitator.py" output="screen"/>
+
+</launch>
