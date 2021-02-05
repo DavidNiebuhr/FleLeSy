@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import uuid
 
 import rospy
 from rosservice import get_service_list
@@ -89,7 +90,7 @@ def NewModule(SRV):  # Service zur Modulanmeldung #SRV=ServiceResponseValues
 
 def app_main():
     rospy.init_node('control_system')  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
-    rospy.Service('control_system/anmeldeservice', register_module, NewModule)
+    rospy.Service('%s/register_module' % rospy.get_name(), register_module, NewModule)
     rospy.loginfo("Das Leitsystem ist online und nimmt Modulanmeldungen entgegen!")
     rospy.spin()
 

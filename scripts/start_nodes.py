@@ -1,31 +1,17 @@
 #!/usr/bin/env python
-import sys
+
 import uuid
 import roslaunch
 import rospy
-from query_kill import query_kill
-
-
-def start_exe(launch, package, executable, name, identification):
-    namespace = identification
-    node = roslaunch.core.Node(package, executable, name, namespace)
-    process = launch.launch(node)
-
-    while rospy.is_shutdown():
-        process.stop()
+from start_a_node import start_a_node
 
 
 def app_main():
+    rospy.init_node("start_nodes")
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
-    sys.stdout.write("\nroscore up and running")
-    rospy.sleep(0.1)
-    identification = str(uuid.uuid4())
-    start_exe(launch, "FleLeSy", "test.py", "testnode", identification)
-
-    sys.stdout.write("\nAll modules are running")
-    while not query_kill("\nKill /roscore and all processes?"):
-        rospy.sleep(1)
+    start_a_node(launch, "FleLeSy", "module_imitator.py", "Module_22")
+    rospy.spin()
 
 
 if __name__ == '__main__':
