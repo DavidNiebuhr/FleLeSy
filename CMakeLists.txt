@@ -166,12 +166,11 @@ catkin_install_python(PROGRAMS
   scripts/control_system.py
   scripts/robot_imitator.py
   scripts/module_imitator.py
-  scripts/Tutorial_add_two_ints_server.py
-  scripts/Tutorial_add_two_ints_client.py
+  scripts/start_modules.py
   scripts/test.py
   scripts/query_yes_no.py
+  scripts/query_kill.py
   scripts/objects_in_list_example.py
-  scripts/start_nodes.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -1,12 +1,8 @@
 #!/usr/bin/env python
-import uuid
 
 import rospy
-from rosservice import get_service_list
-from std_msgs.msg import String
-from FleLeSy.srv import register_module, register_moduleResponse
+from FleLeSy.srv import *
 
-MaxNumberOfModules = 100  # Die Maximale Anzahl an Modulen die ueberhaupt verwendet werden koennen. Z.B. Anzahl Montagemoeglichkeiten, lieber zu viel als zu wenig.
 AllModules = []
 AllRobots = []
 
@@ -15,31 +11,65 @@ class Robot:
     # Attribute der Klasse Robot
 
     # Muss zu genau einem Modul gehoeren
-    def __init__(self, robotname, ID, AffiliatedModule):
+    def __init__(self, robotname, ID):
         self.ID = ID
         self.robotname = robotname
-        self.AffiliatedModule = AffiliatedModule
         AllRobots.append(self)
 
-    def search_for_robot(self):
-        for i in range(0, len(AllRobots)):
-            if AllRobots.ID == self.ID:  # ID ausstehend
-                break
-        return AllRobots[i]
+
+def search_for_robot(ID):
+    for i in range(0, len(AllRobots)):
+        if AllRobots.ID == ID:  # ID ausstehend
+            return AllRobots[i]
+    # gives back Object of class Robot, that has the ID that was asked for
 
 
 class Module:
-    def __init__(self, Robots):  # Erstelle ein Objekt der Klasse Module
-        rospy.loginfo("Ich erstelle jetzt ein Modul mit dem Namen %s." % self)
-        self.Robots = Robot
-        AllModules.append(self)
+    def __init__(self, ModuleName, ModuleID, AffiliatedRobots):  # Erstelle ein Objekt der Klasse Module
+        self.ModuleName = ModuleName
+        self.ModuleID = ModuleID
+        self.Robots = AffiliatedRobots
+        rospy.loginfo("A new Module is registered: %s" % self.ModuleName)
+        if self in AllModules:
+            pass
+        else:
+            AllModules.append(self)
+            for x in range(len(AllModules)):
+                rospy.loginfo(AllModules[x])
 
-    def search_for_module(self):
-        for i in range(0, len(AllModules)):
-            if AllModules.ID == self.ID:  # ID ausstehend
-                break
-        return AllModules[i]
 
+def search_for_module(Identification):
+    for i in range(0, len(AllModules)):
+        if AllModules.ID == Identification:  # ID ausstehend
+            return AllModules[i]
+    # gives back Object of class Module, that has the ID that was asked for
+
+
+def NewModule(SRV):  # Function to register a new module #SRV=ServiceResponseValues
+    rospy.loginfo("I'll now create an object for the new Module")
+    Module(SRV.ModuleName, SRV.ModuleID, SRV.AffiliatedRobots)
+    rospy.loginfo("Done.")
+    return register_moduleResponse(True)
+
+
+def NewRobot(SRV):  # Function to register a new robot #SRV=ServiceResponseValues
+    rospy.loginfo("I'll now create an object for the new Robot")
+    Robot(SRV.RobotName, SRV.RobotID)
+    rospy.loginfo("Done.")
+    return register_robotResponse(True)
+
+
+def app_main():
+    rospy.init_node('control_system')
+    # , log_level=rospy.DEBUG)  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
+    rospy.Service('control_system/register_module', register_module, NewModule)
+    rospy.Service('control_system/register_robot', register_robot, NewRobot)
+    rospy.loginfo("Control System is online and ready for registration requests!")
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    app_main()
 
 """
 class Module:
@@ -67,33 +97,6 @@ class Step:
         self.robot = param_robot  # Der Step wird mit dem uebergebenen Roboter...
         self.payload = param_parameters  # ...und dem uebegebenem Parameter (also was machen) ausgefuehrt.
 """
-
-
-def NewModule(SRV):  # Service zur Modulanmeldung #SRV=ServiceResponseValues
-    if SRV.ModulName in AllModules:
-        rospy.loginfo("Dieses Modul ist bereits angemeldet.")
-        rospy.loginfo(
-            "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
-            SRV.ModulName)
-        return register_moduleResponse(False, SRV.ModulName, AllModules.index(SRV.ModulName))
-    else:
-        i = 0
-        while isinstance(AllModules[i], String):
-            i += 1
-        AllModules[i] = SRV.ModulName
-        # rospy.loginfo("Das Modul %s ist als Objekt verfuegbar. Es hat die Nummer %s in der Liste der Roboter bekommen." % (Modules[i], str(i)))
-        rospy.loginfo(
-            "Das Modul nimmt Befehle entgegen auf /%s_befehle. Diese Bestehen aus zwei Strings: Zielposition und Wegverhalten" %
-            AllModules[i])
-        return register_moduleResponse(True, AllModules[i], i)
-
-
-def app_main():
-    rospy.init_node('control_system')  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
-    rospy.Service('%s/register_module' % rospy.get_name(), register_module, NewModule)
-    rospy.loginfo("Das Leitsystem ist online und nimmt Modulanmeldungen entgegen!")
-    rospy.spin()
-
 
 """
 #Pseudocode fuer punkt 7:
@@ -124,6 +127,3 @@ for j in range(0, steps_count):
     all_steps[j] = punkt_7(service)
 
 """
-
-if __name__ == '__main__':
-    app_main()  # Den Grund warum das extra als Funktion aufgerufen wird habe ich noch nicht verstanden.

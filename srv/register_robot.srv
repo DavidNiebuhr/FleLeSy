@@ -1,6 +1,4 @@
 string RobotName
-string AffiliatedModule
-string AffiliatedManifest
+string RobotID
 ---
 bool Erfolg
-string Identification

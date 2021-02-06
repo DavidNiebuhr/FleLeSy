@@ -1,5 +1,5 @@
 string ModuleName
+string ModuleID
+string[] AffiliatedRobots
 ---
 bool Erfolg
-string SystemweiterModulName
-int16 ModuleNumber

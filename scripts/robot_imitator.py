@@ -2,9 +2,7 @@
 import rospy
 from FleLeSy.srv import *
 
-from query_yes_no import query_yes_no
-
-RobotName = "KUKAchen"
+RobotName = "ThisRobot"
 
 
 def Interpolate(SRV):  # SRV=ServiceResponseValues
@@ -14,29 +12,32 @@ def Interpolate(SRV):  # SRV=ServiceResponseValues
 
 
 def offer_services():
-    rospy.Service('%s/interpolate' % RobotName, Auftrag, Interpolate)
+    rospy.Service('%s/interpolate' % rospy.get_name(), Auftrag, Interpolate)
     rospy.loginfo("Interpolation ist verfuegbar")
-    rospy.spin()
 
 
-def app_main():
-    rospy.init_node(RobotName)
-    rospy.loginfo("Alles klar, ich melde ihn jetzt an.")
-    rospy.wait_for_service('leitsystem/anmeldeservice')
+def register_robot_func():
+    rospy.wait_for_service('/control_system/register_robot', 20)
+    rospy.loginfo("Found it, continuing registration.")
     try:
-        Anmeldeservice = rospy.ServiceProxy('leitsystem/anmeldeservice', register_module)
-        response = Anmeldeservice(RobotName)
+        register_service = rospy.ServiceProxy('/control_system/register_robot', register_robot)
+        response = register_service(rospy.get_name(), rospy.get_namespace())
     except rospy.ServiceException as e:
-        rospy.logerr("Anmeldung konnte nicht beantragt werden: %s" % e)
+        rospy.logerr("Registration has failed: %s" % e)
     if response.Erfolg:
-        rospy.loginfo("Das Modul ist beim System unter %s bekannt und traegt die Nummer %s" % (
-            response.SystemweiterModulName, response.ModuleNumber))
+        rospy.loginfo("Robot %s is registered." % rospy.get_name())
     else:
         rospy.logwarn(
             "Das Leitsystem hat einen Fehler zurueckgemeldet. Wahrscheinlich ist das Modul bereits angemeldet.")
     offer_services()
     return None
 
+
+def app_main():
+    rospy.init_node(RobotName)#, log_level=rospy.DEBUG
+    rospy.loginfo("Roboternode %s is Running. I'll look out for the registration Service." % rospy.get_name())
+    register_robot_func()
+    rospy.spin()
 
 
 if __name__ == '__main__':
