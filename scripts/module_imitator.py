@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import os
-import time
+
 import uuid
 import roslaunch
 import rospy
@@ -27,17 +26,19 @@ class Robot:
 
 
 def regist_module():
+    global response
     rospy.wait_for_service('/control_system/register_module')
     try:
         register = rospy.ServiceProxy('/control_system/register_module', register_module)
-        response = register(rospy.get_name(), rospy.get_namespace(), Affiliated_Robots)
+        response = register(rospy.get_name(), Affiliated_Robots)
     except rospy.ServiceException as e:
-        rospy.logerr("Error during registration:\n%s" % e)
-    if response.Erfolg:
-        rospy.loginfo("The control system confirmed the registration.")
+        rospy.logerr("M: Error during registration:\n%s" % e)
+        response.success = False
+    if response.success:
+        rospy.loginfo("M: The control system confirmed the registration.")
     else:
         rospy.logwarn(
-            "Something seem to be wrong here.")
+            "M: Something seem to be wrong here.")
 
 
 def app_main():
@@ -55,15 +56,15 @@ def app_main():
     simrobot1.start_robot_exe(launch)"""
     robot1 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
     robot1.start_robot_exe(launch)
-    rospy.sleep(0.5)
+    rospy.sleep(0.2)
     robot2 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
     robot2.start_robot_exe(launch)
-    rospy.loginfo("All Robots of %s should be running." % rospy.get_name())
-    rospy.sleep(0.2)
-    rospy.loginfo("I'll register myself and will tell which robots are on this plattform.")
+    rospy.loginfo("M: All Robots of %s should be running." % rospy.get_name())
+    rospy.sleep(0.7)
+    rospy.loginfo("M: I'll register myself and will tell which robots are on this plattform.")
     # Anmeldevorgang
     regist_module()
-    rospy.loginfo("Done.")
+    rospy.loginfo("M: Registration complete")
     rospy.spin()
 
 

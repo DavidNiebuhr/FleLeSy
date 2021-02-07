@@ -168,8 +168,7 @@ catkin_install_python(PROGRAMS
   scripts/module_imitator.py
   scripts/start_modules.py
   scripts/test.py
-  scripts/query_yes_no.py
-  scripts/query_kill.py
+  scripts/queries.py
   scripts/objects_in_list_example.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

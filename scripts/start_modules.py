@@ -5,17 +5,18 @@ import rospy
 from start_a_node import start_a_node
 
 
+
 def start_module(launch, package, executable, name):
-    node = roslaunch.core.Node(package, executable, name, output="screen")
+    node = roslaunch.core.Node(package, executable, name) #, output="screen")
     launch.launch(node)
 
 
 def app_main():
-    rospy.sleep(0.5)
+    rospy.sleep(0.2)
     rospy.init_node("start_modules")
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
-    start_module(launch, "FleLeSy", "module_imitator.py", str(uuid.uuid4()).replace("-", "_"))
+    start_module(launch, "FleLeSy", "module_imitator.py", "m" + str(uuid.uuid4()).replace("-", "_"))
     rospy.spin()
 
 

@@ -1,4 +1,4 @@
-string RobotName
 string RobotID
+string AffiliatedModuleID
 ---
-bool Erfolg
+bool success

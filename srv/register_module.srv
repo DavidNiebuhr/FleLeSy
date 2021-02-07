@@ -1,5 +1,4 @@
-string ModuleName
 string ModuleID
 string[] AffiliatedRobots
 ---
-bool Erfolg
+bool success
