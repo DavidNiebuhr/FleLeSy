@@ -4,7 +4,7 @@ import rospy
 import sys
 from FleLeSy.srv import *
 from queries import *
-from rosservice import get_service_list
+from rosservice import *
 
 AllModules = []
 AllRobots = []
@@ -47,16 +47,27 @@ def search_for_module(Identification):
 
 def service_selection(chosen_robot):
     sys.stdout.write("The chosen Robots offers the following services:\n\n")
-    service_list = map(str, get_service_list(node=None, namespace=None, include_nodes=False))
+    service_list = map(str, get_service_list(include_nodes=False))
+    this_robot_service_list = []
     for i in range(0, len(service_list)):
         if service_list[i].startswith(AllRobots[chosen_robot].RobotID):
-            sys.stdout.write("[%s] " % i + service_list[i] + "\n")
-
+            this_robot_service_list.append(service_list[i])
+    for j in range(0, len(this_robot_service_list)):
+        sys.stdout.write("[%s] " % j + this_robot_service_list[j] + "\n")
+    chosen_service_nr = query_number("\nChoose a service.", 0, len(this_robot_service_list))
+    chosen_service = this_robot_service_list[chosen_service_nr]
+    rospy.loginfo("User chose:\n" + str(chosen_service))
+    sys.stdout.write("The following arguments are needed:\n")
+    rospy.loginfo(get_service_args(chosen_service))
+    rospy.loginfo(type(chosen_service))
+    rospy.loginfo(get_service_type(chosen_service))
+    rospy.loginfo(get_service_uri(chosen_service))
 
 def robot_selection(chosen_module):
     sys.stdout.write("The following robots are on the chosen module and available:\n")
     for i in range(0, len(AllRobots)):
         # An Alternative solution would be to just use the AffiliatedRobot List
+        # would be better because the numbers would start by 0...
         # If this won't be used I can leave it out of the regisitration srv/msg.
         if AllRobots[i].AffiliatedModuleID == AllModules[chosen_module].ModuleID:
             sys.stdout.write("[%s] " % i + AllRobots[i].RobotID + "\n")
@@ -106,60 +117,3 @@ def app_main():
 
 if __name__ == '__main__':
     app_main()
-
-"""
-class Module:
-    #Attribute der Klasse Robo:
-    #topic = None
-    #pub = None
-    #Funktionen der Klasse Robo:
-    def __init__(self, name): #Erstelle ein Objekt der Klasse Robo
-        self.topic = "/" + name + "/action" #Schreibe gleich das fuer ihn vorgesehenene Topic in seine Attribute, damit er darauf zurueckgreifen kann.
-        self.pub = rospy.Publisher(self.topic, String, queue_size=10)  #Vermerke in seinen Attributen die Funktion mir der er auf dem fuer ihn vorgesehenen Topic publishen kann.
-        #rospy.Publisher creates a "handle" to publish messages to a topic using the rospy.Publisher Class
-
-    def do_action(self, payload):
-        self.pub.publish(payload) #Auf dem Topic des Objekts, auf das diese Funktionen angewandt wird, soll die mitgegebene Payload gepublished werden.
-"""
-
-"""
-class Step:
-    # Attribute der Klasse Step:
-    robot = None
-    payload = None
-
-    # Funktionen der Klasse Step:
-    def __init__(self, param_robot, param_parameters):  # Erstelle ein Objekt der Klasse Step
-        self.robot = param_robot  # Der Step wird mit dem uebergebenen Roboter...
-        self.payload = param_parameters  # ...und dem uebegebenem Parameter (also was machen) ausgefuehrt.
-"""
-
-"""
-#Pseudocode fuer punkt 7:
-def punkt_7(service):
-    msg_list = service.getAllMessageTypes()
-    print("Available Functions for service1", msg_list)
-    #klassischerweise loopt man durch die msg_list und gibt davor eine index nummer aus. Der User muss dann nur eine nummer eintippen
-    #bsp output des loops:
-    
-    [0]: MyFunction1
-    [1]: MyFunction2
-    ...
-    
-    msg_type = waitForVALIDIntegerInput() #Um aus der Lite auszuwaehlen
-    print("Enter Message:")
-    msg = []
-    for i in range(0, len(msg_type.parameters)):
-        msg[i] = waitForInput()
-
-
-#speudocode fuer punkt 8:
-#sei wfi() = waitForInput()
-steps_count = wfi()
-all_steps = []
-for j in range(0, steps_count):
-    #auch hier ist eine liste nicht schlecht....
-    service = wfi()
-    all_steps[j] = punkt_7(service)
-
-"""

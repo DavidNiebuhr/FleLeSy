@@ -1,20 +1,30 @@
 #!/usr/bin/env python
 import rospy
 from FleLeSy.srv import *
+from std_msgs.msg import String
 
 RobotName = "ThisRobot"
+currently_working = False  # working = True
 
 
 def Interpolate(SRV):  # SRV=ServiceResponseValues
+    global currently_working
+    currently_working = True
     rospy.loginfo("R: Moving to point\nX: %s\nY: %s\nZ: %s\n with interpolation" % (
         SRV.target.X, SRV.target.Y, SRV.target.Z))
-    # Zeit einprogrammieren für die dann der Roboter in den Zustand working versetzt wird.
-    return True
+    rospy.sleep(10)
+    currently_working = False
+    return AuftragResponse(True)
 
 
 def publish_robot_state():
-    #Publish endeffektor position
-    #Publish if working or waiting
+    # Publish endeffektor position
+    # Publish if working or resting
+    pub = rospy.Publisher('%s/working_or_resting' % rospy.get_name(), String, queue_size=10)  # working = True
+    r = rospy.Rate(1)  # 10hz
+    while not rospy.is_shutdown():
+        pub.publish(str(currently_working))
+        r.sleep()
     pass
 
 
@@ -50,6 +60,7 @@ def app_main():
     rospy.loginfo("R: Roboternode %s is Running. I'll look out for the registration Service." % rospy.get_name())
     register_robot_func()
     offer_services()
+    publish_robot_state()
     rospy.spin()
 
 
