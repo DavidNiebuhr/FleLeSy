@@ -11,9 +11,6 @@ AllRobots = []
 
 
 class Robot:
-    # Attribute der Klasse Robot
-
-    # Muss zu genau einem Modul gehoeren
     def __init__(self, RobotID, AffiliatedModuleID):
         self.RobotID = RobotID
         self.robotname = "NoNameGiven"
@@ -29,6 +26,7 @@ def search_for_robot(ID):
 
 
 class Module:
+
     def __init__(self, ModuleID, AffiliatedRobots):  # Erstelle ein Objekt der Klasse Module
         self.ModuleName = "NoNameGiven"
         self.ModuleID = ModuleID
@@ -47,13 +45,35 @@ def search_for_module(Identification):
     # gives back Object of class Module, that has the ID that was asked for
 
 
-def step_by_step_service_selection():
+def service_selection(chosen_robot):
+    sys.stdout.write("The chosen Robots offers the following services:\n\n")
+    service_list = map(str, get_service_list(node=None, namespace=None, include_nodes=False))
+    for i in range(0, len(service_list)):
+        if service_list[i].startswith(AllRobots[chosen_robot].RobotID):
+            sys.stdout.write("[%s] " % i + service_list[i] + "\n")
+
+
+def robot_selection(chosen_module):
+    sys.stdout.write("The following robots are on the chosen module and available:\n")
+    for i in range(0, len(AllRobots)):
+        # An Alternative solution would be to just use the AffiliatedRobot List
+        # If this won't be used I can leave it out of the regisitration srv/msg.
+        if AllRobots[i].AffiliatedModuleID == AllModules[chosen_module].ModuleID:
+            sys.stdout.write("[%s] " % i + AllRobots[i].RobotID + "\n")
+    chosen_robot = query_number("\nChoose the robot.", 0, len(AllRobots))
+    rospy.loginfo("User chose: " + str(chosen_robot))
+    sys.stdout.write("CS: You chose\n" + str(AllRobots[chosen_robot].RobotID) + "\n\n")
+    service_selection(chosen_robot)
+
+
+def module_selection():
     sys.stdout.write("The following modules are available:\n")
     for i in range(0, len(AllModules)):
         sys.stdout.write("[%s] " % i + AllModules[i].ModuleID + "\n")
-    chosen_module = query_number("Choose the module.", 0, len(AllModules))
+    chosen_module = query_number("\nChoose the module.", 0, len(AllModules))
     rospy.loginfo("User chose: " + str(chosen_module))
-    sys.stdout.write("You chose\n" + str(AllModules[chosen_module].ModuleID) + "\n")
+    sys.stdout.write("CS: You chose\n" + str(AllModules[chosen_module].ModuleID) + "\n\n")
+    robot_selection(chosen_module)
 
 
 def NewModule(SRV):  # Function to register a new module #SRV=ServiceResponseValues
@@ -71,8 +91,7 @@ def NewRobot(SRV):  # Function to register a new robot #SRV=ServiceResponseValue
 
 
 def app_main():
-    rospy.init_node('control_system')
-    # , log_level=rospy.DEBUG)  # Sorgt dafuer dass der Code als Node existiert und gibt ihm den Namen Leitsystem
+    rospy.init_node('control_system')  # , log_level=rospy.DEBUG
     rospy.Service('control_system/register_module', register_module, NewModule)
     rospy.Service('control_system/register_robot', register_robot, NewRobot)
     rospy.loginfo("Control System is online and ready for registration requests!")
@@ -80,7 +99,8 @@ def app_main():
     # service_list = map(str, get_service_list(node=None, namespace=None, include_nodes=False))
     """rospy.loginfo("Those are all services available on the system: \n\n%s\n" % ",\n".join(
         service_list))"""
-    step_by_step_service_selection()
+    module_selection()
+    # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)
     rospy.spin()
 
 

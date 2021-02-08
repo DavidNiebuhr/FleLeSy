@@ -8,12 +8,23 @@ RobotName = "ThisRobot"
 def Interpolate(SRV):  # SRV=ServiceResponseValues
     rospy.loginfo("R: Moving to point\nX: %s\nY: %s\nZ: %s\n with interpolation" % (
         SRV.target.X, SRV.target.Y, SRV.target.Z))
+    # Zeit einprogrammieren für die dann der Roboter in den Zustand working versetzt wird.
     return True
+
+
+def publish_robot_state():
+    #Publish endeffektor position
+    #Publish if working or waiting
+    pass
 
 
 def offer_services():
     rospy.Service('%s/interpolate' % rospy.get_name(), Auftrag, Interpolate)
     rospy.loginfo("R: Interpolation is available")
+    rospy.Service('%s/milling' % rospy.get_name(), Auftrag, Interpolate)
+    rospy.loginfo("R: Milling is available")
+    rospy.Service('%s/pic_and_place' % rospy.get_name(), Auftrag, Interpolate)
+    rospy.loginfo("R: Pick and place is available")
 
 
 def register_robot_func():
@@ -22,7 +33,7 @@ def register_robot_func():
     rospy.loginfo("R: Found it, continuing registration.")
     try:
         register_service = rospy.ServiceProxy('/control_system/register_robot', register_robot)
-        response = register_service(rospy.get_name(), rospy.get_namespace())
+        response = register_service(rospy.get_name(), rospy.get_namespace()[:-1])
     except rospy.ServiceException as e:
         rospy.logerr("R: Registration has failed: %s" % e)
         response.success = False
@@ -31,14 +42,14 @@ def register_robot_func():
     else:
         rospy.logwarn(
             "R: Controlsystem returned that it didn't work")
-    offer_services()
     return None
 
 
 def app_main():
-    rospy.init_node(RobotName)#, log_level=rospy.DEBUG
+    rospy.init_node(RobotName)  # , log_level=rospy.DEBUG
     rospy.loginfo("R: Roboternode %s is Running. I'll look out for the registration Service." % rospy.get_name())
     register_robot_func()
+    offer_services()
     rospy.spin()
 
 
