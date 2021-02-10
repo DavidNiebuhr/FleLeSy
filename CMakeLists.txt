@@ -60,6 +60,9 @@ add_service_files(
   register_module.srv
   register_robot.srv
   Auftrag.srv
+  Interpolate.srv
+  Milling.srv
+  PTP.srv
 )
 
 ## Generate actions in the 'action' folder

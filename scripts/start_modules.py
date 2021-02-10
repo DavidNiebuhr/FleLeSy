@@ -16,7 +16,8 @@ def app_main():
     rospy.init_node("start_modules")
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
-    start_module(launch, "FleLeSy", "module_imitator.py", "m" + str(uuid.uuid4()).replace("-", "_"))
+    start_module(launch, "FleLeSy", "module_imitator.py", "m1" + str(uuid.uuid4()).replace("-", "_"))
+    start_module(launch, "FleLeSy", "module_imitator.py", "m2" + str(uuid.uuid4()).replace("-", "_"))
     rospy.spin()
 
 

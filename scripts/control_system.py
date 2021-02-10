@@ -1,26 +1,65 @@
 #!/usr/bin/env python
 
-import rospy
-import sys
 from FleLeSy.srv import *
-from queries import *
+from geometry_msgs.msg import Point
 from rosservice import *
 
-AllModules = []
-AllRobots = []
+from queries import *
+
+AllModules = []  # change to set?
+AllRobots = []  # change to set?
+x = 3.3
+y = -1.9
+z = 112.3
+
+
+# Milling_step_tuple = (call_point2point(), spindle_start, call_interpolate, spindle_stop, resting_postition)
+# Nailing_step_tuple = (call_point2point, shoot_nail, resting_position)
+
+
+class Task:
+    def __init__(self, starting_point, task_list, target_point):
+        self.starting_point = starting_point
+        self.task_list = task_list
+        self.target_point = target_point
+        task0 = task_list(0)
+        task0(starting_point)
 
 
 class Robot:
     def __init__(self, RobotID, AffiliatedModuleID):
         self.RobotID = RobotID
-        self.robotname = "NoNameGiven"
+        self.robot_name = "NoNameGiven"
         self.AffiliatedModuleID = AffiliatedModuleID
         AllRobots.append(self)
+
+    def call_interpolate(self, ix, iy, iz):
+        rospy.wait_for_service('%s/interpolate' % self.RobotID)
+        rospy.loginfo("calling interpolate now")
+        try:
+            interp = rospy.ServiceProxy('%s/interpolate' % self.RobotID, Interpolate)
+            resp1 = interp(Point(ix, iy, iz))
+            return resp1.success
+        except rospy.ServiceException as e:
+            print("Service call failed: %s" % e)
+
+    def call_point2point(self, x, y, z):
+        rospy.wait_for_service('%s/point2point' % self.RobotID)
+        rospy.loginfo("calling point2point now")
+        try:
+            p2p = rospy.ServiceProxy('%s/point2point' % self.RobotID, Interpolate)
+            resp1 = p2p(x, y, z)
+            return resp1.success
+        except rospy.ServiceException as e:
+            print("Service call failed: %s" % e)
+
+    def resting_position(self):
+        return self.call_point2point(x=0, y=20, z=500)
 
 
 def search_for_robot(ID):
     for i in range(0, len(AllRobots)):
-        if AllRobots.ID == ID:  # ID ausstehend
+        if AllRobots[i].ID == ID:  # ID ausstehend
             return AllRobots[i]
     # gives back Object of class Robot, that has the ID that was asked for
 
@@ -34,20 +73,20 @@ class Module:
         rospy.loginfo("CS: A new Module is registered: %s" % self.ModuleID)
         # self.ModuleAlias = queries.query_alias("Please give %s a nickname" % ModuleName)
         AllModules.append(self)
-        for x in range(len(AllModules)):
+        """for x in range(len(AllModules)):
             rospy.loginfo("CS: All Modules that are currently registered:\n" + AllModules[x].ModuleID)
-
+"""
 
 def search_for_module(Identification):
     for i in range(0, len(AllModules)):
-        if AllModules.ID == Identification:  # ID ausstehend
+        if AllModules[i].ID == Identification:  # ID ausstehend
             return AllModules[i]
     # gives back Object of class Module, that has the ID that was asked for
 
 
 def service_selection(chosen_robot):
     sys.stdout.write("The chosen Robots offers the following services:\n\n")
-    service_list = map(str, get_service_list(include_nodes=False))
+    service_list = get_service_list(include_nodes=False)
     this_robot_service_list = []
     for i in range(0, len(service_list)):
         if service_list[i].startswith(AllRobots[chosen_robot].RobotID):
@@ -57,20 +96,21 @@ def service_selection(chosen_robot):
     chosen_service_nr = query_number("\nChoose a service.", 0, len(this_robot_service_list))
     chosen_service = this_robot_service_list[chosen_service_nr]
     rospy.loginfo("User chose:\n" + str(chosen_service))
-    sys.stdout.write("The following arguments are needed:\n")
-    rospy.loginfo(get_service_args(chosen_service))
-    rospy.loginfo(type(chosen_service))
-    rospy.loginfo(get_service_type(chosen_service))
-    rospy.loginfo(get_service_uri(chosen_service))
+    if "interpolate" in str(chosen_service):
+        AllRobots[chosen_robot].call_interpolate(x, y, z)
+
 
 def robot_selection(chosen_module):
     sys.stdout.write("The following robots are on the chosen module and available:\n")
+    this_module_robot_list = []
     for i in range(0, len(AllRobots)):
         # An Alternative solution would be to just use the AffiliatedRobot List
-        # would be better because the numbers would start by 0...
         # If this won't be used I can leave it out of the regisitration srv/msg.
+        rospy.logdebug("Vergleiche %s mit %s." % (AllRobots[i].AffiliatedModuleID, AllModules[chosen_module].ModuleID))
         if AllRobots[i].AffiliatedModuleID == AllModules[chosen_module].ModuleID:
-            sys.stdout.write("[%s] " % i + AllRobots[i].RobotID + "\n")
+            this_module_robot_list.append(AllRobots[i].RobotID)
+    for j in range(0, len(this_module_robot_list)):
+        sys.stdout.write("[%s] " % j + this_module_robot_list[j] + "\n")
     chosen_robot = query_number("\nChoose the robot.", 0, len(AllRobots))
     rospy.loginfo("User chose: " + str(chosen_robot))
     sys.stdout.write("CS: You chose\n" + str(AllRobots[chosen_robot].RobotID) + "\n\n")
@@ -102,14 +142,11 @@ def NewRobot(SRV):  # Function to register a new robot #SRV=ServiceResponseValue
 
 
 def app_main():
-    rospy.init_node('control_system')  # , log_level=rospy.DEBUG
+    rospy.init_node('control_system', log_level=rospy.DEBUG)
     rospy.Service('control_system/register_module', register_module, NewModule)
     rospy.Service('control_system/register_robot', register_robot, NewRobot)
     rospy.loginfo("Control System is online and ready for registration requests!")
     rospy.sleep(5)
-    # service_list = map(str, get_service_list(node=None, namespace=None, include_nodes=False))
-    """rospy.loginfo("Those are all services available on the system: \n\n%s\n" % ",\n".join(
-        service_list))"""
     module_selection()
     # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)
     rospy.spin()
