@@ -67,11 +67,11 @@ def interpolate(SRV):  # SRV=ServiceResponseValues
 def publish_robot_state():
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
-        wor = rospy.Publisher('%s/working_or_resting' % rospy.get_name(), std_msgs.msg.Bool,
+        wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
                               queue_size=10)  # working = True
         wor.publish(currently_working)
 
-        eep = rospy.Publisher('%s/endeffektor_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
+        eep = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
         eep.publish(position[0], position[1], position[2])
 
         go = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # open = True

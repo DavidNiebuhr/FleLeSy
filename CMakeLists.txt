@@ -173,6 +173,7 @@ catkin_install_python(PROGRAMS
   scripts/test.py
   scripts/queries.py
   scripts/objects_in_list_example.py
+  scripts/xml_as_dict.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

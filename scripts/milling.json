@@ -1,0 +1,22 @@
+[
+  {
+    "Service": "/point2point",
+    "Service_param": "target"
+  },
+  {
+    "Service": "/start_spindle",
+    "Service_param": "None"
+  },
+  {
+    "Service": "/interpolate",
+    "Service_param": "target"
+  },
+  {
+    "Service": "/stop_spindle",
+    "Service_param": "target"
+  },
+  {
+    "Service": "/point2point",
+    "Service_param": "target"
+  }
+]

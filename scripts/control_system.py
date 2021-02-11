@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-
+import json
+from xml.etree import ElementTree
 from FleLeSy.srv import *
 from geometry_msgs.msg import Point
 from rosservice import *
-
+# from FleLeSy.docs import Milling.xml
 from queries import *
+import os
 
 AllModules = []  # change to set?
 AllRobots = []  # change to set?
@@ -12,18 +14,17 @@ x = 3.3
 y = -1.9
 z = 112.3
 
-
 # Milling_step_tuple = (call_point2point(), spindle_start, call_interpolate, spindle_stop, resting_postition)
 # Nailing_step_tuple = (call_point2point, shoot_nail, resting_position)
 
 
-class Task:
+"""class Task:
     def __init__(self, starting_point, task_list, target_point):
         self.starting_point = starting_point
         self.task_list = task_list
         self.target_point = target_point
         task0 = task_list(0)
-        task0(starting_point)
+        task0(starting_point)"""
 
 
 class Robot:
@@ -33,7 +34,7 @@ class Robot:
         self.AffiliatedModuleID = AffiliatedModuleID
         AllRobots.append(self)
 
-    def call_interpolate(self, ix, iy, iz):
+    """def call_interpolate(self, ix, iy, iz):
         rospy.wait_for_service('%s/interpolate' % self.RobotID)
         rospy.loginfo("calling interpolate now")
         try:
@@ -54,7 +55,23 @@ class Robot:
             print("Service call failed: %s" % e)
 
     def resting_position(self):
-        return self.call_point2point(x=0, y=20, z=500)
+        return self.call_point2point(x=0, y=20, z=500)"""
+
+
+def milling(robot_id, start_point, target_point):
+    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(THIS_FOLDER, 'milling.json')
+
+    handle2 = json.load(open(my_file, "r"))
+    rospy.logdebug(handle2)
+    for i in range(0, len(handle2)):
+        try:
+            interp = rospy.ServiceProxy('%s%s' % (robot_id, key), Interpolate)
+            resp1 = interp(Point(start_point))
+            while not resp1:
+                rospy.sleep(1)
+        except rospy.ServiceException as e:
+            print("Service call failed: %s" % e)
 
 
 def search_for_robot(ID):
@@ -77,6 +94,7 @@ class Module:
             rospy.loginfo("CS: All Modules that are currently registered:\n" + AllModules[x].ModuleID)
 """
 
+
 def search_for_module(Identification):
     for i in range(0, len(AllModules)):
         if AllModules[i].ID == Identification:  # ID ausstehend
@@ -95,7 +113,7 @@ def service_selection(chosen_robot):
         sys.stdout.write("[%s] " % j + this_robot_service_list[j] + "\n")
     chosen_service_nr = query_number("\nChoose a service.", 0, len(this_robot_service_list))
     chosen_service = this_robot_service_list[chosen_service_nr]
-    rospy.loginfo("User chose:\n" + str(chosen_service))
+    rospy.logdebug("User chose:\n" + str(chosen_service))
     if "interpolate" in str(chosen_service):
         AllRobots[chosen_robot].call_interpolate(x, y, z)
 
@@ -112,7 +130,7 @@ def robot_selection(chosen_module):
     for j in range(0, len(this_module_robot_list)):
         sys.stdout.write("[%s] " % j + this_module_robot_list[j] + "\n")
     chosen_robot = query_number("\nChoose the robot.", 0, len(AllRobots))
-    rospy.loginfo("User chose: " + str(chosen_robot))
+    rospy.logdebug("User chose: " + str(chosen_robot))
     sys.stdout.write("CS: You chose\n" + str(AllRobots[chosen_robot].RobotID) + "\n\n")
     service_selection(chosen_robot)
 
@@ -122,23 +140,48 @@ def module_selection():
     for i in range(0, len(AllModules)):
         sys.stdout.write("[%s] " % i + AllModules[i].ModuleID + "\n")
     chosen_module = query_number("\nChoose the module.", 0, len(AllModules))
-    rospy.loginfo("User chose: " + str(chosen_module))
+    rospy.logdebug("User chose: " + str(chosen_module))
     sys.stdout.write("CS: You chose\n" + str(AllModules[chosen_module].ModuleID) + "\n\n")
     robot_selection(chosen_module)
 
 
 def NewModule(SRV):  # Function to register a new module #SRV=ServiceResponseValues
-    rospy.loginfo("CS: I'll now create an object for the new Module")
+    rospy.logdebug("CS: I'll now create an object for the new Module")
     Module(SRV.ModuleID, SRV.AffiliatedRobots)
-    rospy.loginfo("CS: Done.")
+    rospy.logdebug("CS: Done.")
     return register_moduleResponse(True)
 
 
 def NewRobot(SRV):  # Function to register a new robot #SRV=ServiceResponseValues
-    rospy.loginfo("CS: I'll now create an object for the new Robot")
+    rospy.logdebug("CS: I'll now create an object for the new Robot")
     Robot(SRV.RobotID, SRV.AffiliatedModuleID)
-    rospy.loginfo("CS: Done.")
+    rospy.logdebug("CS: Done.")
     return register_robotResponse(True)
+
+
+def json_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
+    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(THIS_FOLDER, 'milling.json')
+
+    handle = open(my_file, "r")
+    content = handle.read()
+    rospy.logdebug(content)
+    handle2 = json.load(open(my_file, "r"))
+    rospy.logdebug(handle2)
+
+
+"""def xml_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
+    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(THIS_FOLDER, 'milling.xml')
+    tree = ElementTree.parse(my_file)
+    root = tree.getroot()
+    xmldict = XmlDictConfig(root)
+    rospy.logdebug(type(xmldict))
+    rospy.logdebug(xmldict)
+
+    handle = open(my_file, "r")
+    content = handle.read()
+    rospy.logdebug(content)"""
 
 
 def app_main():
@@ -147,7 +190,8 @@ def app_main():
     rospy.Service('control_system/register_robot', register_robot, NewRobot)
     rospy.loginfo("Control System is online and ready for registration requests!")
     rospy.sleep(5)
-    module_selection()
+    json_stuff()
+    # module_selection()
     # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)
     rospy.spin()
 
