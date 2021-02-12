@@ -62,11 +62,16 @@ def milling(robot_id, start_point, target_point):
     THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
     my_file = os.path.join(THIS_FOLDER, 'milling.json')
 
-    handle2 = json.load(open(my_file, "r"))
-    rospy.logdebug(handle2)
-    for i in range(0, len(handle2)):
+    file = open(my_file, "r")
+    json_string = file.read()
+    json_data = json.loads(json_string)
+    rospy.logdebug(json_data)
+
+    for i in range(0, len(json_data)):
         try:
-            interp = rospy.ServiceProxy('%s%s' % (robot_id, key), Interpolate)
+            rospy.loginfo('%s%s' % (json_data[i].get("Service"), i))
+            interp = rospy.ServiceProxy('%s%s' % (robot_id, json_data[i].get("Service")), Interpolate)
+            rospy.logdebug(start_point)
             resp1 = interp(Point(start_point))
             while not resp1:
                 rospy.sleep(1)
@@ -95,11 +100,29 @@ class Module:
 """
 
 
-def search_for_module(Identification):
+class Registry:
+    def __init__(self):
+        pass
+
+    def new_module(self, SRV):  # Function to register a new module #SRV=ServiceResponseValues
+        rospy.logdebug("CS: I'll now create an object for the new Module")
+        Module(SRV.ModuleID, SRV.AffiliatedRobots)
+        rospy.logdebug("CS: Done.")
+        return register_moduleResponse(True)
+
+    def new_robot(self, SRV):  # Function to register a new robot #SRV=ServiceResponseValues
+        rospy.logdebug("CS: I'll now create an object for the new Robot")
+        Robot(SRV.RobotID, SRV.AffiliatedModuleID)
+        rospy.logdebug("CS: Done.")
+        return register_robotResponse(True)
+
+
+"""def search_for_module(Identification):
     for i in range(0, len(AllModules)):
         if AllModules[i].ID == Identification:  # ID ausstehend
             return AllModules[i]
     # gives back Object of class Module, that has the ID that was asked for
+"""
 
 
 def service_selection(chosen_robot):
@@ -115,7 +138,7 @@ def service_selection(chosen_robot):
     chosen_service = this_robot_service_list[chosen_service_nr]
     rospy.logdebug("User chose:\n" + str(chosen_service))
     if "interpolate" in str(chosen_service):
-        AllRobots[chosen_robot].call_interpolate(x, y, z)
+        milling()
 
 
 def robot_selection(chosen_module):
@@ -145,29 +168,17 @@ def module_selection():
     robot_selection(chosen_module)
 
 
-def NewModule(SRV):  # Function to register a new module #SRV=ServiceResponseValues
-    rospy.logdebug("CS: I'll now create an object for the new Module")
-    Module(SRV.ModuleID, SRV.AffiliatedRobots)
-    rospy.logdebug("CS: Done.")
-    return register_moduleResponse(True)
-
-
-def NewRobot(SRV):  # Function to register a new robot #SRV=ServiceResponseValues
-    rospy.logdebug("CS: I'll now create an object for the new Robot")
-    Robot(SRV.RobotID, SRV.AffiliatedModuleID)
-    rospy.logdebug("CS: Done.")
-    return register_robotResponse(True)
-
-
 def json_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
-    THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-    my_file = os.path.join(THIS_FOLDER, 'milling.json')
+    this_folder = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(this_folder, 'milling.json')
 
     handle = open(my_file, "r")
     content = handle.read()
-    rospy.logdebug(content)
-    handle2 = json.load(open(my_file, "r"))
-    rospy.logdebug(handle2)
+    content_handle = json.loads(content)
+    rospy.logdebug(content_handle)
+    rospy.loginfo(content_handle[0])
+    first_service = content_handle[0].get("Service")
+    rospy.loginfo(first_service)
 
 
 """def xml_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
@@ -186,11 +197,14 @@ def json_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
 
 def app_main():
     rospy.init_node('control_system', log_level=rospy.DEBUG)
-    rospy.Service('control_system/register_module', register_module, NewModule)
-    rospy.Service('control_system/register_robot', register_robot, NewRobot)
+    registry = Registry()
+    rospy.Service('control_system/register_module', register_module, registry.new_module)
+    rospy.Service('control_system/register_robot', register_robot, registry.new_robot)
     rospy.loginfo("Control System is online and ready for registration requests!")
     rospy.sleep(5)
-    json_stuff()
+    rospy.loginfo(AllRobots[0].RobotID)
+    milling(AllRobots[0].RobotID, ([1, 1, 1]), [2, 2, 2])
+    # json_stuff()
     # module_selection()
     # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)
     rospy.spin()

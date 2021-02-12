@@ -93,6 +93,7 @@ def offer_services():
     rospy.loginfo("R: Pick and place is available")
 
 
+
 def register_robot_func():
     response = None
     rospy.wait_for_service('/control_system/register_robot', 20)

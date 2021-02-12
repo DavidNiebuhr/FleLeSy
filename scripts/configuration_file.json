@@ -1,0 +1,79 @@
+[
+  [
+    {
+      "Type": "Type_A",
+      "Position": [
+        0,
+        0
+      ]
+    },
+    {
+      "Type": "Type_B",
+      "Position": [
+        10,
+        0
+      ]
+    },
+    {
+      "Type": "Type_C",
+      "Position": [
+        5,
+        10
+      ]
+    },
+    {
+      "Type": "Type_A",
+      "Position": [
+        20,
+        0
+      ]
+    }
+  ],
+  {
+    "Type_A": {
+      "Topics": [
+        "position"
+      ],
+      "Robots": [
+        {
+          "name": "KUKA_kr120",
+          "Robot_Services": [
+            "point2point",
+            "interpolate"
+          ]
+        },
+        {
+          "name": "KUKA_kr120",
+          "Robot_Services": [
+            "point2point",
+            "interpolieren"
+          ]
+        }
+      ]
+    },
+    "Type_B": {
+      "Topics": [
+        "position"
+      ],
+      "Robots": {
+        "name": "KUKA_kr210",
+        "Robot_Services": [
+          "point2point",
+          "interpolate"
+        ]
+      }
+    },
+    "Type_C": {
+      "Topics": [
+        "position"
+      ],
+      "Robots": {
+        "name": "ABB IRB1600",
+        "Robot_Services": [
+          "point2point",
+          "interpolate"
+        ]
+      }
+    }
+  }
+]

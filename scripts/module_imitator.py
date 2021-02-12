@@ -3,11 +3,12 @@
 import uuid
 import roslaunch
 import rospy
+import std_msgs
 from FleLeSy.srv import *
 from start_a_node import start_a_node
 
 Affiliated_Robots = []  # list of identification numbers of robots on platform
-
+module_position = [0, 0]
 
 class Robot:
     def __init__(self, package, executable, name):
@@ -39,6 +40,13 @@ def regist_module():
     else:
         rospy.logwarn(
             "M: Something seem to be wrong here.")
+def publish_robot_state():
+    while not rospy.is_shutdown():
+        r = rospy.Rate(1)  # 10hz
+        wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
+                              queue_size=10)  # working = True
+        wor.publish(module_position)
+        r.sleep()
 
 
 def app_main():
