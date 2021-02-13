@@ -3,6 +3,15 @@ import rospy
 from FleLeSy.srv import *
 from std_msgs.msg import std_msgs
 
+"""
+Abbreviations:
+CS = control system
+fm = fabrication module
+OE = operating element
+"""
+
+
+
 RobotName = "ThisRobot"
 currently_working = False  # working = True
 gripper_open = False
@@ -10,35 +19,35 @@ spindle_on = False
 x = -4.2
 y = +19.3
 z = +132.4
-position = [x, y, z]
+oe_position = [x, y, z]
 
 
 def move_x_to(x_target):
-    while x_target != position[0]:
-        if position[0] < x_target:
-            position[0] += 0.1
+    while x_target != oe_position[0]:
+        if oe_position[0] < x_target:
+            oe_position[0] += 0.1
         else:
-            position[0] -= 0.1
+            oe_position[0] -= 0.1
         rospy.sleep(0.01)
     return True
 
 
 def move_y_to(y_target):
-    while y_target != position[1]:
-        if position[1] < y_target:
-            position[1] += 0.1
+    while y_target != oe_position[1]:
+        if oe_position[1] < y_target:
+            oe_position[1] += 0.1
         else:
-            position[1] -= 0.1
+            oe_position[1] -= 0.1
         rospy.sleep(0.01)
     return True
 
 
 def move_z_to(z_target):
-    while z_target != position[2]:
-        if position[2] < z_target:
-            position[2] += 0.1
+    while z_target != oe_position[2]:
+        if oe_position[2] < z_target:
+            oe_position[2] += 0.1
         else:
-            position[2] -= 0.1
+            oe_position[2] -= 0.1
         rospy.sleep(0.01)
     return True
 
@@ -71,8 +80,8 @@ def publish_robot_state():
                               queue_size=10)  # working = True
         wor.publish(currently_working)
 
-        eep = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
-        eep.publish(position[0], position[1], position[2])
+        ee_pos = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
+        ee_pos.publish(oe_position[0], oe_position[1], oe_position[2])
 
         go = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # open = True
         go.publish(gripper_open)

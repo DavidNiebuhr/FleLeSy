@@ -4,28 +4,32 @@
       "Type": "Type_A",
       "Position": [
         0,
-        0
+        0,
+        90
       ]
     },
     {
       "Type": "Type_B",
       "Position": [
         10,
-        0
+        0,
+        90
       ]
     },
     {
       "Type": "Type_C",
       "Position": [
         5,
-        10
+        10,
+        90
       ]
     },
     {
       "Type": "Type_A",
       "Position": [
         20,
-        0
+        0,
+        90
       ]
     }
   ],
@@ -33,7 +37,7 @@
     "Type_A": {
       "Name": "TIM_Fabrikationsmodul_1",
       "Topics": [
-        "position"
+        "pose"
       ],
       "operating_elements": [
         {
@@ -47,7 +51,7 @@
           "Name": "KUKA_kr120",
           "Robot_Services": [
             "point2point",
-            "interpolieren"
+            "interpolate"
           ]
         }
       ]
@@ -55,7 +59,7 @@
     "Type_B": {
       "Name": "Grüne Plattform",
       "Topics": [
-        "position"
+        "pose"
       ],
       "operating_elements": [
         {
@@ -70,7 +74,7 @@
     "Type_C": {
       "Name": "Zusatzplattform",
       "Topics": [
-        "position"
+        "pose"
       ],
       "operating_elements": [
         {

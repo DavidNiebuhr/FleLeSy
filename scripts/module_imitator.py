@@ -4,36 +4,41 @@ import os
 import uuid
 import roslaunch
 import rospy
-import std_msgs
 from FleLeSy.srv import *
-from start_a_node import start_a_node
 
-Affiliated_Robots = []  # list of identification numbers of robots on platform
-module_position = [0, 0]
+"""
+Abbreviations:
+CS = control system
+fm = fabrication module
+OE = operating element
+"""
 
-
-class Robot:
-    def __init__(self, package, executable, name):
-        self.identification = "r%s" % str(uuid.uuid4()).replace("-", "_")
-        self.package = package
-        self.executable = executable
-        self.name = name
-        Affiliated_Robots.append(self.identification)
-
-    def start_robot_exe(self, launch):
-        start_a_node(launch, self.package, self.executable, self.name)
-
-        """ namespace = self.identification
-        exe = roslaunch.core.Node(self.package, self.executable, self.name, namespace)
-        process = launch.launch(exe)"""
+affiliated_oe_id_list = []
+position_of_this_fm = []
 
 
-def regist_module():
+def publish_fm_pose():
+    while not rospy.is_shutdown():
+        r = rospy.Rate(0.5)
+        fm_pos = rospy.Publisher('%s/platform_pose' % rospy.get_name(), geometry_msgs.msg.Pose2D, queue_size=10)
+        fm_pos.publish(position_of_this_fm[0], position_of_this_fm[1], position_of_this_fm[2])
+        r.sleep()
+
+
+def publish_fm_state(config_data):
+    type_of_fm = config_data[0][int(rospy.get_name()[3])].get("Type")
+    topics = config_data[1].get(type_of_fm).get("Topics")
+    if "pose" in topics:
+        publish_fm_pose()
+    # other states may follow
+
+
+def register_fm_at_cs():
     global response
     rospy.wait_for_service('/control_system/register_module')
     try:
         register = rospy.ServiceProxy('/control_system/register_module', register_module)
-        response = register(rospy.get_name(), Affiliated_Robots)
+        response = register(rospy.get_name(), affiliated_oe_id_list)
     except rospy.ServiceException as e:
         rospy.logerr("M: Error during registration:\n%s" % e)
         response.success = False
@@ -44,26 +49,22 @@ def regist_module():
             "M: Something seem to be wrong here.")
 
 
-"""def publish_robot_state():
-    while not rospy.is_shutdown():
-        r = rospy.Rate(1)  # 10hz
-        wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
-                              queue_size=10)  # working = True
-        wor.publish(module_position)
-        r.sleep()"""
-
-
 def start_particular_oe(launch, name, namespace):
-    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace, output="screen")
+    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace)  # , output="screen")
     launch.launch(node)
+    affiliated_oe_id_list.append(str(namespace) + "/" + str(name))
 
 
 def start_all_oe(launch, config_data):
+    # Divide configuration_file into two parts:
     types_and_positions = config_data[0]
     type_description = config_data[1]
+
+    # Whats the type of this FM
     place_in_config_list = int(rospy.get_name()[3])
     type_of_this_module = types_and_positions[place_in_config_list].get("Type")
-    rospy.logdebug("This Module has number %s and is a %s platform" % (rospy.get_name()[3], type_of_this_module))
+
+    # call start every OE that is on such type of FM
     type_description_of_this_module = type_description.get(type_of_this_module)
     oe_of_this_module = type_description_of_this_module.get("operating_elements")
     rospy.logdebug(oe_of_this_module)
@@ -73,6 +74,7 @@ def start_all_oe(launch, config_data):
 
 
 def app_main():
+    # Initialize Node, prepare launch
     rospy.init_node("Where will this appear?", log_level=rospy.DEBUG)
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
@@ -85,19 +87,23 @@ def app_main():
     json_string = file.read()
     config_data = json.loads(json_string)
 
+    # initial getting position from config file
+    global position_of_this_fm
+    types_and_positions = config_data[0]
+    place_in_config_list = int(rospy.get_name()[3])
+    position_of_this_fm = types_and_positions[place_in_config_list].get("Position")
+
     # start operation entities
     start_all_oe(launch, config_data)
-
-    """robot1 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
-    robot1.start_robot_exe(launch)
-    rospy.sleep(0.2)
-    robot2 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
-    robot2.start_robot_exe(launch)"""
-    rospy.loginfo("M: All Robots of %s should be running." % rospy.get_name())
     rospy.sleep(0.5)
-    # Anmeldevorgang
-    regist_module()
-    rospy.loginfo("M: Registration complete")
+
+    # register at the control system
+    register_fm_at_cs()
+
+    # publish information about this modules status
+    publish_fm_state(config_data)
+
+    # that's all for now
     rospy.spin()
 
 
