@@ -31,19 +31,20 @@
   ],
   {
     "Type_A": {
+      "Name": "TIM_Fabrikationsmodul_1",
       "Topics": [
         "position"
       ],
       "Robots": [
         {
-          "name": "KUKA_kr120",
+          "Name": "KUKA_kr120",
           "Robot_Services": [
             "point2point",
             "interpolate"
           ]
         },
         {
-          "name": "KUKA_kr120",
+          "Name": "KUKA_kr120",
           "Robot_Services": [
             "point2point",
             "interpolieren"
@@ -52,11 +53,12 @@
       ]
     },
     "Type_B": {
+      "Name": "Grüne Plattform",
       "Topics": [
         "position"
       ],
       "Robots": {
-        "name": "KUKA_kr210",
+        "Name": "KUKA_kr210",
         "Robot_Services": [
           "point2point",
           "interpolate"
@@ -64,11 +66,12 @@
       }
     },
     "Type_C": {
+      "Name": "Zusatzplattform",
       "Topics": [
         "position"
       ],
       "Robots": {
-        "name": "ABB IRB1600",
+        "Name": "ABB IRB1600",
         "Robot_Services": [
           "point2point",
           "interpolate"

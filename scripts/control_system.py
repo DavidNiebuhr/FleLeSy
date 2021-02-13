@@ -196,14 +196,14 @@ def json_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
 
 
 def app_main():
-    rospy.init_node('control_system', log_level=rospy.DEBUG)
+    rospy.init_node('control_system') #, log_level=rospy.DEBUG)
     registry = Registry()
     rospy.Service('control_system/register_module', register_module, registry.new_module)
     rospy.Service('control_system/register_robot', register_robot, registry.new_robot)
     rospy.loginfo("Control System is online and ready for registration requests!")
     rospy.sleep(5)
-    rospy.loginfo(AllRobots[0].RobotID)
-    milling(AllRobots[0].RobotID, ([1, 1, 1]), [2, 2, 2])
+    #rospy.loginfo(AllRobots[0].RobotID)
+    #milling(AllRobots[0].RobotID, ([1, 1, 1]), [2, 2, 2])
     # json_stuff()
     # module_selection()
     # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)

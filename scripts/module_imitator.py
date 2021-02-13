@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+import json
+import os
 import uuid
 import roslaunch
 import rospy
@@ -9,6 +10,7 @@ from start_a_node import start_a_node
 
 Affiliated_Robots = []  # list of identification numbers of robots on platform
 module_position = [0, 0]
+
 
 class Robot:
     def __init__(self, package, executable, name):
@@ -40,6 +42,8 @@ def regist_module():
     else:
         rospy.logwarn(
             "M: Something seem to be wrong here.")
+
+
 def publish_robot_state():
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
@@ -49,27 +53,37 @@ def publish_robot_state():
         r.sleep()
 
 
-def app_main():
-    rospy.init_node("Where will this appear?")
-    """uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-    roslaunch.configure_logging(uuid.replace("-","_"))
-    launch = roslaunch.parent.ROSLaunchParent(uuid,
-                                           ["/home/david/catkin_ws/src/kuka210_moveit_config/launch/demo.launch"])
-    launch.start()"""
+def start_all_oe(launch, config_data):
+    types_and_positions = config_data[0]
+    type_description = config_data[1]
+    place_in_config_list = int(rospy.get_name()[3])
+    type_of_this_module = types_and_positions[place_in_config_list].get("Type")
+    rospy.logdebug("This Module has number %s and is a %s platform" % (rospy.get_name()[3], type_of_this_module))
 
+
+def app_main():
+    rospy.init_node("Where will this appear?", log_level=rospy.DEBUG)
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
     rospy.sleep(0.1)
-    """simrobot1 = Robot("kuka210_moveit_config", "demo.launch", "KUKA_kr210")
-    simrobot1.start_robot_exe(launch)"""
-    robot1 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
+
+    # Open configuration file:
+    this_folder = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(this_folder, 'configuration_file.json')
+    file = open(my_file, "r")
+    json_string = file.read()
+    config_data = json.loads(json_string)
+
+    # start operation entities
+    start_all_oe(launch, config_data)
+
+    """robot1 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
     robot1.start_robot_exe(launch)
     rospy.sleep(0.2)
     robot2 = Robot("FleLeSy", "robot_imitator.py", rospy.get_name())
-    robot2.start_robot_exe(launch)
+    robot2.start_robot_exe(launch)"""
     rospy.loginfo("M: All Robots of %s should be running." % rospy.get_name())
-    rospy.sleep(0.7)
-    rospy.loginfo("M: I'll register myself and will tell which robots are on this plattform.")
+    rospy.sleep(0.5)
     # Anmeldevorgang
     regist_module()
     rospy.loginfo("M: Registration complete")
