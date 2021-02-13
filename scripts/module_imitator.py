@@ -44,13 +44,18 @@ def regist_module():
             "M: Something seem to be wrong here.")
 
 
-def publish_robot_state():
+"""def publish_robot_state():
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
         wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
                               queue_size=10)  # working = True
         wor.publish(module_position)
-        r.sleep()
+        r.sleep()"""
+
+
+def start_particular_oe(launch, name, namespace):
+    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace, output="screen")
+    launch.launch(node)
 
 
 def start_all_oe(launch, config_data):
@@ -59,6 +64,12 @@ def start_all_oe(launch, config_data):
     place_in_config_list = int(rospy.get_name()[3])
     type_of_this_module = types_and_positions[place_in_config_list].get("Type")
     rospy.logdebug("This Module has number %s and is a %s platform" % (rospy.get_name()[3], type_of_this_module))
+    type_description_of_this_module = type_description.get(type_of_this_module)
+    oe_of_this_module = type_description_of_this_module.get("operating_elements")
+    rospy.logdebug(oe_of_this_module)
+    for oe in range(0, len(oe_of_this_module)):
+        start_particular_oe(launch,
+                            "oe%s_" % oe + str(uuid.uuid4()).replace("-", "_"), rospy.get_name())
 
 
 def app_main():

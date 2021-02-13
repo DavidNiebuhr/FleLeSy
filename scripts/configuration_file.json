@@ -35,7 +35,7 @@
       "Topics": [
         "position"
       ],
-      "Robots": [
+      "operating_elements": [
         {
           "Name": "KUKA_kr120",
           "Robot_Services": [
@@ -57,26 +57,30 @@
       "Topics": [
         "position"
       ],
-      "Robots": {
-        "Name": "KUKA_kr210",
-        "Robot_Services": [
-          "point2point",
-          "interpolate"
-        ]
-      }
+      "operating_elements": [
+        {
+          "Name": "KUKA_kr210",
+          "Robot_Services": [
+            "point2point",
+            "interpolate"
+          ]
+        }
+      ]
     },
     "Type_C": {
       "Name": "Zusatzplattform",
       "Topics": [
         "position"
       ],
-      "Robots": {
-        "Name": "ABB IRB1600",
-        "Robot_Services": [
-          "point2point",
-          "interpolate"
-        ]
-      }
+      "operating_elements": [
+        {
+          "Name": "ABB IRB1600",
+          "Robot_Services": [
+            "point2point",
+            "interpolate"
+          ]
+        }
+      ]
     }
   }
 ]
