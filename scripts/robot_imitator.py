@@ -62,7 +62,7 @@ def move_to(x_target, y_target, z_target):
     return True
 
 
-def interpolate(SRV):  # SRV=ServiceResponseValues
+def interpolate(SRV, this_service):  # SRV=ServiceResponseValues
     global currently_working
     rospy.loginfo("R: Moving to point\nX: %s\nY: %s\nZ: %s\n with interpolation" % (
         SRV.target.X, SRV.target.Y, SRV.target.Z))
@@ -71,10 +71,10 @@ def interpolate(SRV):  # SRV=ServiceResponseValues
         currently_working = True
         rospy.sleep(1)
     currently_working = False
-    return AuftragResponse(True)
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
-def point2point(SRV):
+def point2point(SRV, this_service):
     global currently_working
     rospy.loginfo("R: Moving to point\nX: %s\nY: %s\nZ: %s\n with interpolation" % (
         SRV.target.X, SRV.target.Y, SRV.target.Z))
@@ -83,39 +83,43 @@ def point2point(SRV):
         currently_working = True
         rospy.sleep(1)
     currently_working = False
-    return AuftragResponse(True)
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
-def spindle_on(SRV):
+def start_spindle(SRV, this_service):
     global spindle_on_status
     spindle_on_status = True
     global currently_working
     currently_working = True
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
-def spindle_off(SRV):
+def stop_spindle(SRV, this_service):
     global spindle_on_status
     spindle_on_status = False
     global currently_working
     currently_working = False
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
-def open_gripper(SRV):
+def open_gripper(SRV, this_service):
     global currently_working
     currently_working = True
     global gripper_open
     gripper_open = True
     rospy.sleep(2)
     currently_working = False
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
-def close_gripper(SRV):
+def close_gripper(SRV, this_service):
     global currently_working
     currently_working = True
     global gripper_open
     gripper_open = False
     rospy.sleep(2)
     currently_working = False
+    return eval(this_service.get("srv_file") + str("Response"))(True)
 
 
 def offer_services(this_oe_data):
@@ -124,7 +128,7 @@ def offer_services(this_oe_data):
         this_service = this_oe_services[service]
         rospy.logdebug(this_service)
         rospy.Service('%s/%s' % (rospy.get_name(), this_service.get("Name")),
-                      eval(this_service.get("srv_file")), eval(this_service.get("callback")))
+                      eval(this_service.get("srv_file")), eval(this_service.get("callback")), this_service)
 
     """rospy.Service('%s/point2point' % rospy.get_name(), Auftrag, interpolate)
     rospy.logdebug("R: Milling is available")"""

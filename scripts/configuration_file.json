@@ -97,14 +97,14 @@
               "callback": "point2point"
             },
             {
-              "Name": "spindle_on",
+              "Name": "start_spindle",
               "srv_file": "set_bool_status",
-              "callback": "spindle_on"
+              "callback": "start_spindle"
             },
             {
-              "Name": "spindle_off",
+              "Name": "stop_spindle",
               "srv_file": "set_bool_status",
-              "callback": "spindle_off"
+              "callback": "stop_spindle"
             }
           ],
           "Topics": [

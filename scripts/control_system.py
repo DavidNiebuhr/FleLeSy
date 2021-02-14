@@ -4,7 +4,6 @@ from xml.etree import ElementTree
 from FleLeSy.srv import *
 from geometry_msgs.msg import Point
 from rosservice import *
-# from FleLeSy.docs import Milling.xml
 from queries import *
 import os
 
@@ -15,9 +14,6 @@ fm = fabrication module
 OE = operating element
 """
 
-
-AllModules = []  # change to set?
-AllRobots = []  # change to set?
 x = 3.3
 y = -1.9
 z = 112.3
@@ -40,7 +36,6 @@ class Robot:
         self.RobotID = RobotID
         self.robot_name = "NoNameGiven"
         self.AffiliatedModuleID = AffiliatedModuleID
-        AllRobots.append(self)
 
     """def call_interpolate(self, ix, iy, iz):
         rospy.wait_for_service('%s/interpolate' % self.RobotID)
@@ -87,42 +82,39 @@ def milling(robot_id, start_point, target_point):
             print("Service call failed: %s" % e)
 
 
-def search_for_robot(ID):
-    for i in range(0, len(AllRobots)):
-        if AllRobots[i].ID == ID:  # ID ausstehend
-            return AllRobots[i]
-    # gives back Object of class Robot, that has the ID that was asked for
-
-
 class Module:
-
     def __init__(self, ModuleID, AffiliatedRobots):  # Erstelle ein Objekt der Klasse Module
         self.ModuleName = "NoNameGiven"
         self.ModuleID = ModuleID
         self.Robots = AffiliatedRobots
-        rospy.loginfo("CS: A new Module is registered: %s" % self.ModuleID)
+        rospy.logdebug("CS: A new Module is registered: %s" % self.ModuleID)
         # self.ModuleAlias = queries.query_alias("Please give %s a nickname" % ModuleName)
-        AllModules.append(self)
-        """for x in range(len(AllModules)):
-            rospy.loginfo("CS: All Modules that are currently registered:\n" + AllModules[x].ModuleID)
-"""
 
 
 class Registry:
     def __init__(self):
+        self.all_fm = []  # change to set?
+        self.all_oe = []  # change to set?
+
+    def get_oe(self, oe_id):
         pass
 
-    def new_module(self, SRV):  # Function to register a new module #SRV=ServiceResponseValues
-        rospy.logdebug("CS: I'll now create an object for the new Module")
-        Module(SRV.ModuleID, SRV.AffiliatedRobots)
-        rospy.logdebug("CS: Done.")
-        return register_moduleResponse(True)
+    def get_fm(self, fm_id):
+        pass
 
-    def new_robot(self, SRV):  # Function to register a new robot #SRV=ServiceResponseValues
+    def new_oe(self, SRV):  # Function to register a new robot #SRV=ServiceResponseValues
         rospy.logdebug("CS: I'll now create an object for the new Robot")
-        Robot(SRV.RobotID, SRV.AffiliatedModuleID)
+        oe = Robot(SRV.RobotID, SRV.AffiliatedModuleID)
+        self.all_oe.append(oe)
         rospy.logdebug("CS: Done.")
         return register_robotResponse(True)
+
+    def new_fm(self, SRV):  # Function to register a new module #SRV=ServiceResponseValues
+        rospy.logdebug("CS: I'll now create an object for the new Module")
+        fm = Module(SRV.ModuleID, SRV.AffiliatedRobots)
+        self.all_fm.append(fm)
+        rospy.logdebug("CS: Done.")
+        return register_moduleResponse(True)
 
 
 """def search_for_module(Identification):
@@ -179,8 +171,8 @@ def module_selection():
 def app_main():
     rospy.init_node('control_system')  # , log_level=rospy.DEBUG)
     registry = Registry()
-    rospy.Service('control_system/register_module', register_module, registry.new_module)
-    rospy.Service('control_system/register_robot', register_robot, registry.new_robot)
+    rospy.Service('control_system/register_module', register_module, registry.new_fm)
+    rospy.Service('control_system/register_robot', register_robot, registry.new_oe)
     rospy.loginfo("Control System is online and ready for registration requests!")
     rospy.sleep(5)
     # rospy.loginfo(AllRobots[0].RobotID)

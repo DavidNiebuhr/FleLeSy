@@ -7,7 +7,7 @@ import rospy
 
 
 def start_particular_fm(launch, name):
-    node = roslaunch.core.Node("FleLeSy", "module_imitator.py", name, output="screen")
+    node = roslaunch.core.Node("FleLeSy", "module_imitator.py", name)#, output="screen")
     launch.launch(node)
 
 
@@ -32,7 +32,7 @@ def start_all_fm(launch):
 
 def app_main():
     rospy.sleep(0.1)  # Let control system start first
-    rospy.init_node("start_modules", log_level=rospy.DEBUG)
+    rospy.init_node("start_modules")  # , log_level=rospy.DEBUG)
     # Preparation:
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()

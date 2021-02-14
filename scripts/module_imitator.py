@@ -49,7 +49,7 @@ def register_fm_at_cs():
 
 
 def start_particular_oe(launch, name, namespace):
-    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace, output="screen")
+    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace)  # , output="screen")
     launch.launch(node)
     affiliated_oe_id_list.append(str(namespace) + "/" + str(name))
 
