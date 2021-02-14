@@ -24,31 +24,31 @@ oe_position = [x, y, z]
 
 
 def move_x_to(x_target):
-    while x_target != oe_position[0]:
-        if oe_position[0] < x_target:
-            oe_position[0] += 0.1
-        else:
-            oe_position[0] -= 0.1
+    while x_target > (oe_position[0] + 0.05):
+        oe_position[0] += 0.1
+        rospy.sleep(0.01)
+    while (oe_position[0] - 0.05) > x_target:
+        oe_position[0] -= 0.1
         rospy.sleep(0.01)
     return True
 
 
 def move_y_to(y_target):
-    while y_target != oe_position[1]:
-        if oe_position[1] < y_target:
-            oe_position[1] += 0.1
-        else:
-            oe_position[1] -= 0.1
+    while y_target > (oe_position[1] + 0.05):
+        oe_position[1] += 0.1
+        rospy.sleep(0.01)
+    while (oe_position[1] - 0.05) > y_target:
+        oe_position[1] -= 0.1
         rospy.sleep(0.01)
     return True
 
 
 def move_z_to(z_target):
-    while z_target != oe_position[2]:
-        if oe_position[2] < z_target:
-            oe_position[2] += 0.1
-        else:
-            oe_position[2] -= 0.1
+    while z_target > (oe_position[2] + 0.05):
+        oe_position[2] += 0.1
+        rospy.sleep(0.01)
+    while (oe_position[2] - 0.05) > z_target:
+        oe_position[2] -= 0.1
         rospy.sleep(0.01)
     return True
 
@@ -117,6 +117,7 @@ def close_gripper(SRV):
     rospy.sleep(2)
     currently_working = False
 
+
 def offer_services(this_oe_data):
     this_oe_services = this_oe_data.get("Services")
     for service in range(0, len(this_oe_services)):
@@ -131,15 +132,15 @@ def offer_services(this_oe_data):
 
 def publish_robot_state(this_oe_data):
     this_oe_topics = this_oe_data.get("Topics")
-    #topicdict = {"working": }
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
         if "working" in this_oe_topics:
             wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
-                              queue_size=10)  # working = True
+                                  queue_size=10)  # working = True
             wor.publish(currently_working)
         if "end_effector_position" in this_oe_topics:
-            ee_pos = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
+            ee_pos = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point,
+                                     queue_size=10)
             ee_pos.publish(oe_position[0], oe_position[1], oe_position[2])
         if "gripper_open" in this_oe_topics:
             go = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # open = True
