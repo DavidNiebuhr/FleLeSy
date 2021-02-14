@@ -60,8 +60,8 @@ add_service_files(
   register_module.srv
   register_robot.srv
   Auftrag.srv
-  Interpolate.srv
-  Milling.srv
+  one_target.srv
+  set_bool_status.srv
   PTP.srv
 )
 

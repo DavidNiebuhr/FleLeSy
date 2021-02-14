@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import json
+import os
+
 import rospy
 from FleLeSy.srv import *
 from std_msgs.msg import std_msgs
@@ -10,15 +13,13 @@ fm = fabrication module
 OE = operating element
 """
 
-
-
 RobotName = "ThisRobot"
 currently_working = False  # working = True
 gripper_open = False
-spindle_on = False
-x = -4.2
-y = +19.3
-z = +132.4
+spindle_on_status = False
+x = 0.0
+y = 0.0
+z = 0.0
 oe_position = [x, y, z]
 
 
@@ -73,34 +74,80 @@ def interpolate(SRV):  # SRV=ServiceResponseValues
     return AuftragResponse(True)
 
 
-def publish_robot_state():
+def point2point(SRV):
+    global currently_working
+    rospy.loginfo("R: Moving to point\nX: %s\nY: %s\nZ: %s\n with interpolation" % (
+        SRV.target.X, SRV.target.Y, SRV.target.Z))
+    arrived = move_to(SRV.target.X, SRV.target.Y, SRV.target.Z)
+    while not arrived:
+        currently_working = True
+        rospy.sleep(1)
+    currently_working = False
+    return AuftragResponse(True)
+
+
+def spindle_on(SRV):
+    global spindle_on_status
+    spindle_on_status = True
+    global currently_working
+    currently_working = True
+
+
+def spindle_off(SRV):
+    global spindle_on_status
+    spindle_on_status = False
+    global currently_working
+    currently_working = False
+
+
+def open_gripper(SRV):
+    global currently_working
+    currently_working = True
+    global gripper_open
+    gripper_open = True
+    rospy.sleep(2)
+    currently_working = False
+
+
+def close_gripper(SRV):
+    global currently_working
+    currently_working = True
+    global gripper_open
+    gripper_open = False
+    rospy.sleep(2)
+    currently_working = False
+
+def offer_services(this_oe_data):
+    this_oe_services = this_oe_data.get("Services")
+    for service in range(0, len(this_oe_services)):
+        this_service = this_oe_services[service]
+        rospy.logdebug(this_service)
+        rospy.Service('%s/%s' % (rospy.get_name(), this_service.get("Name")),
+                      eval(this_service.get("srv_file")), eval(this_service.get("callback")))
+
+    """rospy.Service('%s/point2point' % rospy.get_name(), Auftrag, interpolate)
+    rospy.logdebug("R: Milling is available")"""
+
+
+def publish_robot_state(this_oe_data):
+    this_oe_topics = this_oe_data.get("Topics")
+    #topicdict = {"working": }
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
-        wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
+        if "working" in this_oe_topics:
+            wor = rospy.Publisher('%s/working' % rospy.get_name(), std_msgs.msg.Bool,
                               queue_size=10)  # working = True
-        wor.publish(currently_working)
-
-        ee_pos = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
-        ee_pos.publish(oe_position[0], oe_position[1], oe_position[2])
-
-        go = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # open = True
-        go.publish(gripper_open)
-
-        so = rospy.Publisher('%s/spindle_on' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # on = True
-        so.publish(spindle_on)
+            wor.publish(currently_working)
+        if "end_effector_position" in this_oe_topics:
+            ee_pos = rospy.Publisher('%s/end_effector_position' % rospy.get_name(), geometry_msgs.msg.Point, queue_size=10)
+            ee_pos.publish(oe_position[0], oe_position[1], oe_position[2])
+        if "gripper_open" in this_oe_topics:
+            go = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # open = True
+            go.publish(gripper_open)
+        if "spindle_on" in this_oe_topics:
+            so = rospy.Publisher('%s/spindle_on' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # on = True
+            so.publish(spindle_on_status)
         r.sleep()
-
-
-def offer_services():
-    rospy.Service('%s/interpolate' % rospy.get_name(), Auftrag, interpolate)
-    rospy.loginfo("R: Interpolation is available")
-
-    rospy.Service('%s/point2point' % rospy.get_name(), Auftrag, interpolate)
-    rospy.loginfo("R: Milling is available")
-
-    rospy.Service('%s/pic_and_place' % rospy.get_name(), Auftrag, interpolate)
-    rospy.loginfo("R: Pick and place is available")
-
 
 
 def register_robot_func():
@@ -123,10 +170,24 @@ def register_robot_func():
 
 def app_main():
     rospy.init_node(RobotName, log_level=rospy.DEBUG)
-    rospy.loginfo("R: Roboternode %s is Running. I'll look out for the registration Service." % rospy.get_name())
+
+    # Open configuration file:
+    this_folder = os.path.dirname(os.path.abspath(__file__))
+    my_file = os.path.join(this_folder, 'configuration_file.json')
+    file = open(my_file, "r")
+    json_string = file.read()
+    config_data = json.loads(json_string)
+
+    # Get the data of this OE:
+    place_in_config_list = int(rospy.get_name()[3])
+    type_of_affiliated_fm = config_data[0][place_in_config_list].get("Type")
+    oe_list_of_affiliated_fm = config_data[1].get(type_of_affiliated_fm).get("operating_elements")
+    this_oe_data = oe_list_of_affiliated_fm[int(rospy.get_name()[44])]
+    # rospy.logdebug(this_oe_data)
+
     register_robot_func()
-    offer_services()
-    publish_robot_state()
+    offer_services(this_oe_data)
+    publish_robot_state(this_oe_data)
     rospy.spin()
 
 

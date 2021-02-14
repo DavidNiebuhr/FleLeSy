@@ -176,19 +176,6 @@ def module_selection():
     robot_selection(chosen_module)
 
 
-def json_stuff():  # /home/david/catkin_ws/src/FleLeSy/docs/
-    this_folder = os.path.dirname(os.path.abspath(__file__))
-    my_file = os.path.join(this_folder, 'milling.json')
-
-    handle = open(my_file, "r")
-    content = handle.read()
-    content_handle = json.loads(content)
-    rospy.logdebug(content_handle)
-    rospy.loginfo(content_handle[0])
-    first_service = content_handle[0].get("Service")
-    rospy.loginfo(first_service)
-
-
 def app_main():
     rospy.init_node('control_system')  # , log_level=rospy.DEBUG)
     registry = Registry()
@@ -198,7 +185,6 @@ def app_main():
     rospy.sleep(5)
     # rospy.loginfo(AllRobots[0].RobotID)
     # milling(AllRobots[0].RobotID, ([1, 1, 1]), [2, 2, 2])
-    # json_stuff()
     # module_selection()
     # rospy.loginfo("These are all Robots: %s \n" % AllRobots[0].RobotID)
     rospy.spin()

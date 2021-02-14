@@ -40,6 +40,7 @@ def app_main():
     # Main task:
     start_all_fm(launch)
 
+    # Enter spin to keep subnodes alive
     rospy.spin()
 
 

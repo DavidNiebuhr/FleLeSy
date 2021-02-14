@@ -35,53 +35,110 @@
   ],
   {
     "Type_A": {
-      "Name": "TIM_Fabrikationsmodul_1",
+      "Name": "TIM_fabrication_module_1",
       "Topics": [
         "pose"
       ],
       "operating_elements": [
         {
           "Name": "KUKA_kr120",
-          "Robot_Services": [
-            "point2point",
-            "interpolate"
+          "Services": [
+            {
+              "Name": "point2point",
+              "srv_file": "one_target",
+              "callback": "point2point"
+            },
+            {
+              "Name": "interpolate",
+              "srv_file": "one_target",
+              "callback": "interpolate"
+            }
+          ],
+          "Topics": [
+            "working",
+            "end_effector_position",
+            "gripper_open"
           ]
         },
         {
           "Name": "KUKA_kr120",
-          "Robot_Services": [
-            "point2point",
-            "interpolate"
+          "Services": [
+            {
+              "Name": "point2point",
+              "srv_file": "one_target",
+              "callback": "point2point"
+            },
+            {
+              "Name": "interpolate",
+              "srv_file": "one_target",
+              "callback": "interpolate"
+            }
+          ],
+          "Topics": [
+            "working",
+            "end_effector_position",
+            "gripper_open"
           ]
         }
       ]
     },
     "Type_B": {
-      "Name": "Grüne Plattform",
+      "Name": "green platform",
       "Topics": [
         "pose"
       ],
       "operating_elements": [
         {
           "Name": "KUKA_kr210",
-          "Robot_Services": [
-            "point2point",
-            "interpolate"
+          "Services": [
+            {
+              "Name": "point2point",
+              "srv_file": "one_target",
+              "callback": "point2point"
+            },
+            {
+              "Name": "spindle_on",
+              "srv_file": "set_bool_status",
+              "callback": "spindle_on"
+            },
+            {
+              "Name": "spindle_off",
+              "srv_file": "set_bool_status",
+              "callback": "spindle_off"
+            }
+          ],
+          "Topics": [
+            "working",
+            "gripper_open",
+            "spindle_on"
           ]
         }
       ]
     },
     "Type_C": {
-      "Name": "Zusatzplattform",
+      "Name": "additional platform",
       "Topics": [
         "pose"
       ],
       "operating_elements": [
         {
           "Name": "ABB IRB1600",
-          "Robot_Services": [
-            "point2point",
-            "interpolate"
+          "Services": [
+            {
+              "Name": "point2point",
+              "srv_file": "one_target",
+              "callback": "point2point"
+            },
+            {
+              "Name": "interpolate",
+              "srv_file": "one_target",
+              "callback": "interpolate"
+            }
+          ],
+          "Topics": [
+            "working",
+            "end_effector_position",
+            "gripper_open"
           ]
         }
       ]

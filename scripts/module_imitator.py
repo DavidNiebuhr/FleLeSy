@@ -34,14 +34,13 @@ def publish_fm_state(config_data):
 
 
 def register_fm_at_cs():
-    global response
+    response = False
     rospy.wait_for_service('/control_system/register_module')
     try:
         register = rospy.ServiceProxy('/control_system/register_module', register_module)
         response = register(rospy.get_name(), affiliated_oe_id_list)
     except rospy.ServiceException as e:
         rospy.logerr("M: Error during registration:\n%s" % e)
-        response.success = False
     if response.success:
         rospy.loginfo("M: The control system confirmed the registration.")
     else:
@@ -50,7 +49,7 @@ def register_fm_at_cs():
 
 
 def start_particular_oe(launch, name, namespace):
-    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace)  # , output="screen")
+    node = roslaunch.core.Node("FleLeSy", "robot_imitator.py", name, namespace, output="screen")
     launch.launch(node)
     affiliated_oe_id_list.append(str(namespace) + "/" + str(name))
 
