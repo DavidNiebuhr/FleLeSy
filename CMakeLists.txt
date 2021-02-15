@@ -59,10 +59,8 @@ add_service_files(
   FILES
   register_module.srv
   register_robot.srv
-  Auftrag.srv
   one_target.srv
   set_bool_status.srv
-  PTP.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -173,7 +171,9 @@ catkin_install_python(PROGRAMS
   scripts/test.py
   scripts/queries.py
   scripts/objects_in_list_example.py
-  scripts/xml_as_dict.py
+  scripts/spindle.py
+  scripts/gripper.py
+  scripts/nail_gun.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -25,11 +25,8 @@ def publish_fm_pose():
         r.sleep()
 
 
-def publish_fm_state(config_data):
-    type_of_fm = config_data[0][int(rospy.get_name()[3])].get("Type")
-    topics = config_data[1].get(type_of_fm).get("Topics")
-    if "pose" in topics:
-        publish_fm_pose()
+def publish_fm_state():
+    publish_fm_pose()
     # other states may follow
 
 
@@ -100,7 +97,7 @@ def app_main():
     register_fm_at_cs()
 
     # publish information about this modules status
-    publish_fm_state(config_data)
+    publish_fm_state()
 
     # that's all for now
     rospy.spin()

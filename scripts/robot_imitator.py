@@ -2,6 +2,7 @@
 import json
 import os
 
+import roslaunch
 import rospy
 from FleLeSy.srv import *
 from std_msgs.msg import std_msgs
@@ -16,7 +17,7 @@ OE = operating element
 RobotName = "ThisRobot"
 currently_working = False  # working = True
 gripper_open = False
-spindle_on_status = False
+nail_gun_ready = False
 x = 0.0
 y = 0.0
 z = 0.0
@@ -87,7 +88,7 @@ def point2point(SRV, this_service):
 
 
 def start_spindle(SRV, this_service):
-    global spindle_on_status
+    global nail_gun_ready
     spindle_on_status = True
     global currently_working
     currently_working = True
@@ -95,7 +96,7 @@ def start_spindle(SRV, this_service):
 
 
 def stop_spindle(SRV, this_service):
-    global spindle_on_status
+    global nail_gun_ready
     spindle_on_status = False
     global currently_working
     currently_working = False
@@ -151,7 +152,7 @@ def publish_robot_state(this_oe_data):
             go.publish(gripper_open)
         if "spindle_on" in this_oe_topics:
             so = rospy.Publisher('%s/spindle_on' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # on = True
-            so.publish(spindle_on_status)
+            so.publish(nail_gun_ready)
         r.sleep()
 
 
@@ -173,6 +174,16 @@ def register_robot_func():
     return None
 
 
+def start_child_nodes(this_oe_data):
+    child_nodes = this_oe_data.get("Nodes")
+    launch = roslaunch.scriptapi.ROSLaunch()
+    launch.start()
+    for i in range(0, len(child_nodes)):
+        split = child_nodes[i].split(".", 1)
+        node = roslaunch.core.Node("FleLeSy", child_nodes[i], split[0], namespace=rospy.get_name())  # , output="screen")
+        launch.launch(node)
+
+
 def app_main():
     rospy.init_node(RobotName, log_level=rospy.DEBUG)
 
@@ -190,11 +201,13 @@ def app_main():
     this_oe_data = oe_list_of_affiliated_fm[int(rospy.get_name()[44])]
     # rospy.logdebug(this_oe_data)
 
-    register_robot_func()
-    offer_services(this_oe_data)
-    publish_robot_state(this_oe_data)
+    start_child_nodes(this_oe_data)
+
+    # register_robot_func()
+    # offer_services(this_oe_data)
+    # publish_robot_state(this_oe_data)
     rospy.spin()
 
 
 if __name__ == '__main__':
-    app_main()  # Den Grund warum das extra als Funktion aufgerufen wird, habe ich noch nicht verstanden.
+    app_main()
