@@ -69,7 +69,7 @@
         {
           "Name": "ABB IRB1600",
           "OE_Nodes": [
-            "axis_control.py",
+            "axes_control.py",
             "spindle.py"
           ]
         }

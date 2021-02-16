@@ -176,8 +176,8 @@ catkin_install_python(PROGRAMS
   scripts/gripper.py
   scripts/nail_gun.py
   scripts/agts.py
-  scripts/axis_control.py
-  scripts/validation_init.py
+  scripts/axes_control.py
+  scripts/init_configuration.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

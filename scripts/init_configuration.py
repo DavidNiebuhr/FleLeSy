@@ -6,8 +6,8 @@ import roslaunch
 import rospy
 
 
-def start_node(launch, python_program, id, namespace=None):
-    node = roslaunch.core.Node("FleLeSy", python_program, id, namespace, output="screen")
+def start_node(launch, python_program, identification, namespace=None):
+    node = roslaunch.core.Node("FleLeSy", python_program, identification, namespace, output="screen")
     launch.launch(node)
 
 

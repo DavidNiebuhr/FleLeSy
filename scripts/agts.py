@@ -9,6 +9,23 @@ class Movement:
     movement_status = False
 
 
+def register_node_func():
+    response = None
+    rospy.wait_for_service('/control_system/register_robot', 20)
+    rospy.logdebug("R: Found it, continuing registration.")
+    try:
+        register_service = rospy.ServiceProxy('/control_system/register_robot', register_robot)
+        response = register_service(rospy.get_name(), rospy.get_namespace()[:-1])
+    except rospy.ServiceException as e:
+        rospy.logerr("R: Registration has failed: %s" % e)
+        response.success = False
+    if response.success:
+        rospy.logdebug("R: Robot %s is registered." % rospy.get_name())
+    else:
+        rospy.logwarn(
+            "R: Controlsystem returned that it didn't work")
+    return None
+
 def set_movement_status(set_to):
     Movement.movement_status = set_to
 
@@ -55,6 +72,7 @@ def app_main():
 
     offer_services()
     publish_state()
+    register_node_func()
     rospy.spin()
 
 
