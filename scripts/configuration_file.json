@@ -31,13 +31,15 @@
       "operating_elements": [
         {
           "Name": "KUKA_kr120",
-          "Nodes": [
+          "OE_Nodes": [
+            "axis_control.py",
             "gripper.py"
           ]
         },
         {
           "Name": "KUKA_kr120",
-          "Nodes": [
+          "OE_Nodes": [
+            "axis_control.py",
             "nail_gun.py"
           ]
         }
@@ -47,8 +49,15 @@
       "Name": "green platform",
       "operating_elements": [
         {
+          "Name": "FTS1",
+          "OE_Nodes": [
+            "agts.py"
+          ]
+        },
+        {
           "Name": "KUKA_kr210",
-          "Nodes": [
+          "OE_Nodes": [
+            "axis_control.py",
             "gripper.py"
           ]
         }
@@ -59,7 +68,8 @@
       "operating_elements": [
         {
           "Name": "ABB IRB1600",
-          "Nodes": [
+          "OE_Nodes": [
+            "axis_control.py",
             "spindle.py"
           ]
         }

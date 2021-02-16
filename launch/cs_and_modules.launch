@@ -1,7 +1,7 @@
 <launch>
 
 	<node name="control_system" pkg="FleLeSy" type="control_system.py" output="screen"/>
-	<node name="start_modules" pkg="FleLeSy" type="start_modules.py" output="screen"/>
+	<node name="validation_init" pkg="FleLeSy" type="validation_init.py" output="screen"/>
 <!--name="$(anon control_system)"-->
 <!--ns="control_system"-->
 </launch>

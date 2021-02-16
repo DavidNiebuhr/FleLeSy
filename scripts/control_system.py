@@ -72,7 +72,7 @@ def milling(robot_id, start_point, target_point):
 
     for i in range(0, len(json_data)):
         try:
-            rospy.loginfo('%s%s' % (json_data[i].get("Service"), i))
+            rospy.logdebug('%s%s' % (json_data[i].get("Service"), i))
             interp = rospy.ServiceProxy('%s%s' % (robot_id, json_data[i].get("Service")), Interpolate)
             rospy.logdebug(start_point)
             resp1 = interp(Point(start_point))

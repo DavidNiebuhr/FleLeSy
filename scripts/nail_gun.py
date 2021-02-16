@@ -28,7 +28,7 @@ def publish_state():
 
 
 def app_main():
-    rospy.init_node("spindle", log_level=rospy.DEBUG)
+    rospy.init_node("nail_gun") #, log_level=rospy.DEBUG)
 
     offer_services()
     publish_state()

@@ -4,17 +4,17 @@ import rospy
 from FleLeSy.srv import *
 from std_msgs.msg import std_msgs
 
-nail_gun_ready = False
+spindle_on_status = False
 
 
 def open_gripper(SRV):
-    global nail_gun_ready
+    global spindle_on_status
     gripper_open_status = True
     return set_bool_statusResponse(True)
 
 
 def close_gripper(SRV):
-    global nail_gun_ready
+    global spindle_on_status
     gripper_open_status = False
     return set_bool_statusResponse(True)
 
@@ -28,12 +28,12 @@ def publish_state():
     while not rospy.is_shutdown():
         r = rospy.Rate(1)  # 10hz
         so = rospy.Publisher('%s/gripper_open' % rospy.get_name(), std_msgs.msg.Bool, queue_size=10)  # on = True
-        so.publish(nail_gun_ready)
+        so.publish(spindle_on_status)
         r.sleep()
 
 
 def app_main():
-    rospy.init_node("grippers", log_level=rospy.DEBUG)
+    rospy.init_node("grippers")  # , log_level=rospy.DEBUG)
 
     offer_services()
     publish_state()

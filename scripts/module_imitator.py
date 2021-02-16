@@ -5,6 +5,7 @@ import uuid
 import roslaunch
 import rospy
 from FleLeSy.srv import *
+from std_msgs.msg import Float64
 
 """
 Abbreviations:
@@ -15,6 +16,14 @@ OE = operating element
 
 affiliated_oe_id_list = []
 position_of_this_fm = []
+
+
+def be_moved(move_direction):
+    position_of_this_fm[0] += move_direction
+
+
+def wait_to_be_moved():
+    rospy.Subscriber('%s/move_platform' % rospy.get_name(), Float64, be_moved)
 
 
 def publish_fm_pose():
@@ -39,7 +48,7 @@ def register_fm_at_cs():
     except rospy.ServiceException as e:
         rospy.logerr("M: Error during registration:\n%s" % e)
     if response.success:
-        rospy.loginfo("M: The control system confirmed the registration.")
+        rospy.logdebug("M: The control system confirmed the registration.")
     else:
         rospy.logwarn(
             "M: Something seem to be wrong here.")
@@ -71,10 +80,10 @@ def start_all_oe(launch, config_data):
 
 def app_main():
     # Initialize Node, prepare launch
-    rospy.init_node("Where will this appear?", log_level=rospy.DEBUG)
-    launch = roslaunch.scriptapi.ROSLaunch()
+    rospy.init_node("Where will this appear?")  # , log_level=rospy.DEBUG)
+    """launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
-    rospy.sleep(0.1)
+    rospy.sleep(0.1)"""
 
     # Open configuration file:
     this_folder = os.path.dirname(os.path.abspath(__file__))
@@ -88,16 +97,19 @@ def app_main():
     types_and_positions = config_data[0]
     place_in_config_list = int(rospy.get_name()[3])
     position_of_this_fm = types_and_positions[place_in_config_list].get("Position")
-
+    """
     # start operation entities
     start_all_oe(launch, config_data)
-    rospy.sleep(0.5)
+    rospy.sleep(0.5)"""
 
     # register at the control system
     register_fm_at_cs()
 
     # publish information about this modules status
     publish_fm_state()
+
+    # Following gives the ability for agts to move me:
+    wait_to_be_moved()
 
     # that's all for now
     rospy.spin()
